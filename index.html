@@ -939,40 +939,50 @@ function esportaExcel() {
   ];
 
   const last = new Date(anno, mese + 1, 0);
+  const numGiorni = last.getDate();
   let totaleDecimali = 0;
 
-  for (let g = 1; g <= last.getDate(); g++) {
+  for (let g = 1; g <= numGiorni; g++) {
     const d = datiOrario[anno]?.[mese]?.[g] || {};
     
-    // FIX PROTEZIONE DATI VUOTI: Evita che i valori vuoti mandino in crash lo script
-    const totMinuti = d.totaleMinuti || 0;
-    const dec = parseFloat(formatMinutesToDecimal(totMinuti));
+    // Ripristinato il calcolo sicuro dei minuti per evitare crash sui giorni vuoti
+    const tot = d.totaleMinuti || 0;
+    const dec = parseFloat(formatMinutesToDecimal(tot));
     totaleDecimali += dec;
 
     rows.push([
       `${String(g).padStart(2,"0")}/${String(mese+1).padStart(2,"0")}/${anno}`,
-      d.ingressoLavoro || "", 
+      d.ingressoLavoro || "",
       d.uscitaLavoro || "",
-      d.uscitaPermesso || "", 
+      d.uscitaPermesso || "",
       d.ingressoPermesso || "",
-      d.uscitaMissione || "", 
+      d.uscitaMissione || "",
       d.ingressoMissione || "",
-      d.note || "", 
-      totMinuti > 0 ? formatMinutesToHM(totMinuti) : "", 
-      totMinuti > 0 ? dec.toFixed(2) : ""
+      d.note || "",
+      tot > 0 ? formatMinutesToHM(tot) : "",
+      tot > 0 ? dec.toFixed(2) : ""
     ]);
   }
 
   rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
 
-  // GENERA IL FILE BINARIO SENZA CANCELLARE GLI OGGETTI
+  // Generazione e download immediato dell'Excel
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, "Orario");
-  
-  // SCARICA IMMEDIATAMENTE
   XLSX.writeFile(wb, nomeFile);
+
+  // Mostra il banner di conferma
   mostraBanner();
+
+  // CANCELLAZIONE DEI DATI SALVATI (Ripristinata e resa sicura per PC e Android)
+  setTimeout(() => {
+    if (datiOrario[anno] && datiOrario[anno][mese]) {
+      delete datiOrario[anno][mese];
+      salvaDati();
+      generaCalendario();
+    }
+  }, 300);
 }
 
 function mostraBanner() {
