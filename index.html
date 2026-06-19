@@ -958,21 +958,26 @@ function esportaExcel() {
 
   rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
 
+  // 1. CREIAMO IL FOGLIO EXCEL
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, "Orario");
-  // 1. Prima ordiniamo al browser di scaricare il file Excel
+
+  // 2. AVVIAMO IL DOWNLOAD IMMEDIATO (Senza blocchi di sicurezza)
   XLSX.writeFile(wb, nomeFile);
 
-  // 2. Mostriamo il banner verde di conferma a schermo
+  // 3. MOSTRIAMO IL BANNER DI CONFERMA
   mostraBanner();
 
-  // Cancelliamo i dati in locale e aggiornano la griglia del mese corrente
-  if (datiOrario[anno] && datiOrario[anno][mese]) {
-    delete datiOrario[anno][mese];
-    salvaDati();
-    generaCalendario();
-  }
+  // 4. USIAMO UN PICCOLO SEPARATORI PER ANDROID E PC (Soluzione Definitiva)
+  // Svuota la memoria del browser solo dopo che il file è stato fisicamente generato
+  setTimeout(() => {
+    if (datiOrario[anno] && datiOrario[anno][mese]) {
+      delete datiOrario[anno][mese];
+      salvaDati();
+      generaCalendario();
+    }
+  }, 300); 
 }
 
 function mostraBanner() {
