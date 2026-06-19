@@ -1002,12 +1002,20 @@ function esportaExcel() {
     // Mostriamo il banner di successo
     mostraBanner();
 
-    // Svuotiamo il mese e aggiorniamo la schermata
-    if (datiOrario[anno] && datiOrario[anno][mese]) {
-      delete datiOrario[anno][mese];
-      salvaDati();
-      generaCalendario();
-    }
+// PULIZIA TOTALE (Svuota il calendario e azzera la pagina)
+  if (datiOrario[anno] && datiOrario[anno][mese]) {
+    delete datiOrario[anno][mese];
+    salvaDati();
+  }
+
+  // Svuota i campi di testo del Nome e del Cognome
+  if (nomeInput) nomeInput.value = "";
+  if (cognomeInput) cognomeInput.value = "";
+
+  // Ridisegna il calendario vuoto e azzera i contatori del riepilogo
+  generaCalendario();
+}
+
   } catch (errore) {
     alert("Errore durante la generazione del file Excel: " + errore.message);
   }
