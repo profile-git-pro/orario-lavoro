@@ -967,15 +967,12 @@ function esportaExcel() {
   // 2. Mostriamo il banner verde di conferma a schermo
   mostraBanner();
 
-// 3. SVUOTIAMO IL MESE SOLO DOPO UN PICCOLO RITARDO (Fix Bug)
-  // In questo modo il browser ha il tempo di avviare il download del file
-  setTimeout(() => {
-    if (datiOrario[anno] && datiOrario[anno][mese]) {
-      delete datiOrario[anno][mese];
-      salvaDati();
-      generaCalendario();
-    }
-  }, 1000); // Aspetta 1 secondo prima di ripulire il calendario
+  // Cancelliamo i dati in locale e aggiornano la griglia del mese corrente
+  if (datiOrario[anno] && datiOrario[anno][mese]) {
+    delete datiOrario[anno][mese];
+    salvaDati();
+    generaCalendario();
+  }
 }
 
 function mostraBanner() {
