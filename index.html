@@ -433,11 +433,19 @@ td:hover .tooltip { display: block; }
 ============================================================ */
 
 function parseTimeToMinutes(t) {
-  if (!t) return 0;
+  // Se il tempo non esiste, non è una stringa o è vuoto, restituisce 0 senza crashare
+  if (!t || typeof t !== 'string' || t.trim() === "") return 0;
+  
   const parts = t.split(":");
   if (parts.length !== 2) return 0;
-  const h = parseInt(parts[0], 10);
-  const m = parseInt(parts[1], 10);
+  
+  // Controlliamo che entrambe le parti esistano prima di convertirle
+  const hStr = parts[0] ? parts[0].trim() : "0";
+  const mStr = parts[1] ? parts[1].trim() : "0";
+  
+  const h = parseInt(hStr, 10);
+  const m = parseInt(mStr, 10);
+  
   if (isNaN(h) || isNaN(m)) return 0;
   return h * 60 + m;
 }
@@ -452,19 +460,25 @@ function diffMinutes(start, end) {
 
 function calcolaTotaliGiorno(dati) {
   if (!dati) return { lavoro: 0, permesso: 0, missione: 0, totale: 0 };
+  
   const lavoro = diffMinutes(dati.ingressoLavoro, dati.uscitaLavoro);
+  
   let permesso = 0;
   if (dati.uscitaPermesso && dati.ingressoPermesso) {
     permesso = diffMinutes(dati.uscitaPermesso, dati.ingressoPermesso);
   }
+  
   let missione = 0;
   if (dati.uscitaMissione && dati.ingressoMissione) {
     missione = diffMinutes(dati.uscitaMissione, dati.ingressoMissione);
   }
+  
   let totale = lavoro - permesso;
   if (totale < 0) totale = 0;
+  
   return { lavoro, permesso, missione, totale };
 }
+
 function generaBadgeOre(datiG) {
   if (!datiG || !datiG.totale) return "";
   const dec = (datiG.totale / 60).toFixed(2);
