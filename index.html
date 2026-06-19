@@ -2,11 +2,11 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Orario di lavoro</title>
 
   <!-- Libreria Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <script src="https://cloudflare.com"></script>
 
   <style>
 /* ============================
@@ -69,12 +69,13 @@ h1, h2 {
 }
 
 /* ============================
-   PULSANTI
+   PULSANTI - OTTIMIZZATI MOBILE
 ============================ */
 
 .row.buttons-row {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 button {
@@ -86,7 +87,14 @@ button {
   background: #007A4D;
   color: #FFFFFF;
   flex: 1;
-  min-width: 160px;
+  min-width: 120px;
+}
+/* CONTENITORE RESPONSIVE PER IL CALENDARIO */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 25px;
 }
 
 /* ============================
@@ -94,11 +102,12 @@ button {
 ============================ */
 
 #calendar {
-  margin-top: 25px;
   width: 100%;
+  min-width: 600px;
   border-collapse: separate;
   border-spacing: 0;
   background: rgba(255,255,255,0.10);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 18px;
   overflow: hidden;
@@ -116,28 +125,70 @@ button {
   text-align: center;
   cursor: pointer;
   position: relative;
+  color: #003322;
 }
 
-/* ============================
-   RIEPILOGO
-============================ */
+/* STILI INTERNI DEL CALENDARIO */
+.empty { background: transparent !important; }
+.today { box-shadow: inset 0 0 0 3px #C5A067; font-weight: bold; }
+.holiday { background: #ffcccc !important; color: #cc0000 !important; }
+.prefestivo { background: #ffe6cc !important; }
+.saturday { background: rgba(255,255,255,0.70) !important; }
+.sunday { background: rgba(255,255,255,0.50) !important; color: #cc0000; }
+.day-filled { background: #e6f9f0 !important; }
+.day-incomplete { box-shadow: inset 0 0 0 3px #ff9999; }
+.day-total { font-size: 0.8rem; color: #007A4D; margin-top: 2px; }
+.day-badge { background: #007A4D; color: white; font-size: 0.7rem; padding: 2px 4px; border-radius: 6px; display: inline-block; margin-top: 2px; }
+.day-icon { position: absolute; top: 2px; right: 4px; color: #007A4D; font-size: 0.8rem; }
+.day-bar { height: 4px; background: #00A86B; position: absolute; bottom: 0; left: 0; }
+/* TOOLTIP GIORNO */
+td .tooltip {
+  display: none;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #003322;
+  color: white;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  z-index: 10;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+td:hover .tooltip { display: block; }
 
+/* INPUT ERRORE ESPORTAZIONE */
+.input-error { border: 2px solid #ff3333 !important; background: #ffe6e6 !important; }
+#exportTooltip { display: none; color: #ff9999; font-size: 0.9rem; text-align: center; margin-top: 5px; font-weight: bold; }
+
+/* ============================
+   RIEPILOGO - AGGIUNTO GRIGLIA CSS
+============================ */
 #riepilogo {
   margin-top: 15px;
   padding: 15px;
   background: rgba(0, 122, 77, 0.25);
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-radius: 16px;
   color: #C5A067;
 }
+.riepilogo-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.strong { font-weight: bold; }
 
 /* ============================
-   MODALE — VERSIONE UNIVERSALE
+   MODALE — COMPATIBILE E RESPONSIVE
 ============================ */
-
 #modalOverlay {
   position: fixed;
-  inset: 0;
+  top: 0; left: 0; right: 0; bottom: 0;
   background: rgba(0, 122, 77, 0.25);
   display: none;
   align-items: center;
@@ -146,12 +197,7 @@ button {
   opacity: 0;
   transition: opacity 0.25s ease;
 }
-
-#modalOverlay.visible {
-  display: flex;
-  opacity: 1;
-}
-
+#modalOverlay.visible { display: flex; opacity: 1; }
 #modal {
   background: #FFFFFF;
   padding: 15px;
@@ -164,46 +210,37 @@ button {
   flex-direction: column;
   max-height: 90vh;
 }
+.modal-scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.modal-row { margin-bottom: 10px; display: flex; flex-direction: column; }
+.modal-row label { font-weight: bold; margin-bottom: 4px; color: #007A4D; }
+.modal-row input, .modal-row textarea { padding: 8px; border-radius: 8px; border: 1px solid #ccc; font-size: 1rem; }
+.modal-row textarea { resize: vertical; min-height: 60px; }
+.buttons-spaced { display: flex; gap: 8px; margin-top: 10px; }
+.buttons-spaced button { font-size: 0.85rem; padding: 8px; background: #C5A067; }
+.modal-buttons { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; }
 
-.modal-scroll {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+#exportBanner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #00A86B;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: bold;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  display: none;
+  z-index: 10005;
 }
-
-.modal-row {
-  margin-bottom: 10px;
-  display: flex;
-  flex-direction: column;
-}
-
-.modal-buttons {
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
+#exportBanner.visible { display: block; }
 
 /* ============================
    MOBILE + PWA FIX
 ============================ */
-
 @media (max-width: 768px) {
-
-  #modalOverlay {
-    align-items: flex-start;
-  }
-
-  #modal {
-    width: 100%;
-    max-width: 100%;
-    height: 100dvh;
-    max-height: 100dvh;
-    margin: 0;
-    border-radius: 0;
-    padding: 12px 12px 80px;
-  }
-
+  #modalOverlay { align-items: flex-start; }
+  #modal { width: 100%; max-width: 100%; height: 100%; max-height: 100%; margin: 0; border-radius: 0; padding: 12px 12px 120px; }
   .modal-buttons {
     position: fixed;
     bottom: env(safe-area-inset-bottom, 10px);
@@ -212,14 +249,14 @@ button {
     width: calc(100% - 24px);
     max-width: 420px;
     background: rgba(255,255,255,0.95);
+    -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     padding: 10px;
     border-radius: 12px;
     z-index: 10000;
   }
 }
-
-  </style>
+</style>
 
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -230,9 +267,7 @@ button {
     navigator.serviceWorker.register("service-worker.js");
   }
 </script>
-
 </head>
-
 <body>
 <div class="container">
 
@@ -249,6 +284,7 @@ button {
     <label>Cognome:</label>
     <input type="text" id="cognome">
   </div>
+  <div id="exportTooltip">Inserisci Nome e Cognome per esportare in Excel!</div>
 
   <div class="row info-row">
     <label>Anno:</label>
@@ -279,7 +315,6 @@ button {
     <button id="nextMonth">Mese successivo</button>
     <button id="todayBtn">Oggi</button>
   </div>
-
   <!-- ESPORTA / RESET -->
   <div class="row buttons-row">
     <button id="exportExcel">Esporta in Excel</button>
@@ -287,15 +322,17 @@ button {
     <button id="clearAll">Cancella tutto</button>
   </div>
 
-  <!-- CALENDARIO -->
-  <table id="calendar">
-    <thead>
-      <tr>
-        <th>Lunedì</th><th>Martedì</th><th>Mercoledì</th><th>Giovedì</th><th>Venerdì</th><th>Sabato</th><th>Domenica</th>
-      </tr>
-    </thead>
-    <tbody id="calendarBody"></tbody>
-  </table>
+  <!-- CALENDARIO (Dentro il contenitore responsive) -->
+  <div class="table-responsive">
+    <table id="calendar">
+      <thead>
+        <tr>
+          <th>Lunedì</th><th>Martedì</th><th>Mercoledì</th><th>Giovedì</th><th>Venerdì</th><th>Sabato</th><th>Domenica</th>
+        </tr>
+      </thead>
+      <tbody id="calendarBody"></tbody>
+    </table>
+  </div>
 
   <!-- RIEPILOGO -->
   <div id="riepilogo">
@@ -324,7 +361,6 @@ button {
   </div>
 
 </div>
-
 <!-- MODALE UNIVERSALE -->
 <div id="modalOverlay">
   <div id="modal">
@@ -390,9 +426,10 @@ button {
 </div>
 
 <div id="exportBanner">Esportazione in Excel completata</div>
+
 <script>
 /* ============================================================
-   FUNZIONI DI SUPPORTO
+   FUNZIONI DI SUPPORTO E CALCOLO ORE
 ============================================================ */
 
 function parseTimeToMinutes(t) {
@@ -413,50 +450,29 @@ function diffMinutes(start, end) {
   return e - s;
 }
 
-/* ============================================================
-   CALCOLO ORE GIORNALIERE
-============================================================ */
-
 function calcolaTotaliGiorno(dati) {
-  if (!dati) {
-    return { lavoro: 0, permesso: 0, missione: 0, totale: 0 };
-  }
-
+  if (!dati) return { lavoro: 0, permesso: 0, missione: 0, totale: 0 };
   const lavoro = diffMinutes(dati.ingressoLavoro, dati.uscitaLavoro);
-
   let permesso = 0;
   if (dati.uscitaPermesso && dati.ingressoPermesso) {
     permesso = diffMinutes(dati.uscitaPermesso, dati.ingressoPermesso);
   }
-
   let missione = 0;
   if (dati.uscitaMissione && dati.ingressoMissione) {
     missione = diffMinutes(dati.uscitaMissione, dati.ingressoMissione);
   }
-
   let totale = lavoro - permesso;
   if (totale < 0) totale = 0;
-
   return { lavoro, permesso, missione, totale };
 }
-
-/* ============================================================
-   BADGE ORE
-============================================================ */
-
 function generaBadgeOre(datiG) {
   if (!datiG || !datiG.totale) return "";
   const dec = (datiG.totale / 60).toFixed(2);
   return `<div class="day-badge">${dec} h</div>`;
 }
 
-/* ============================================================
-   TOOLTIP GIORNO
-============================================================ */
-
 function generaTooltip(datiG) {
   if (!datiG) return "";
-
   return `
     <div class="tooltip">
       Lavoro: ${formatMinutesToHM(datiG.lavoro)}<br>
@@ -477,18 +493,10 @@ function formatMinutesToDecimal(min) {
   return (min / 60).toFixed(2);
 }
 
-/* ============================================================
-   ICONA GIORNO CON DATI
-============================================================ */
-
 function creaIconaGiorno(tot) {
   if (!tot || !tot.totale || tot.totale === 0) return "";
   return `<span class="day-icon">✓</span>`;
 }
-
-/* ============================================================
-   BARRA GRAFICA ORE
-============================================================ */
 
 function creaBarraOre(tot) {
   if (!tot || !tot.totale || tot.totale === 0) return "";
@@ -496,205 +504,123 @@ function creaBarraOre(tot) {
   return `<div class="day-bar" style="width:${percent}%"></div>`;
 }
 
-/* ============================================================
-   GIORNO INCOMPLETO
-============================================================ */
-
 function isGiornoIncompleto(dati) {
   if (!dati) return false;
   const inL = dati.ingressoLavoro;
   const outL = dati.uscitaLavoro;
-  if ((inL && !outL) || (!inL && outL)) return true;
-  return false;
+  return (inL && !outL) || (!inL && outL);
 }
 
-/* ============================================================
-   CALCOLO RIEPILOGO MENSILE
-============================================================ */
-
 function calcolaRiepilogoMensile(datiMese, giorniTotali) {
-  let totLav = 0;
-  let totPerm = 0;
-  let totMis = 0;
-  let tot = 0;
+  let totLav = 0, totPerm = 0, totMis = 0, tot = 0;
   let giorniConPresenza = 0;
-
   for (const g in datiMese) {
     const d = datiMese[g];
     const t = calcolaTotaliGiorno(d);
-
     totLav += t.lavoro;
     totPerm += t.permesso;
     totMis += t.missione;
     tot += t.totale;
-
     if (t.totale > 0) giorniConPresenza++;
   }
-
   const media = giorniConPresenza > 0 ? (tot / 60) / giorniConPresenza : 0;
   const presenza = giorniTotali > 0 ? (giorniConPresenza / giorniTotali) * 100 : 0;
-
-  return {
-    lavoro: totLav,
-    permesso: totPerm,
-    missione: totMis,
-    totale: tot,
-    media,
-    presenza
-  };
+  return { lavoro: totLav, permesso: totPerm, missione: totMis, totale: tot, media, presenza };
 }
 
-/* ============================================================
-   APPLICA A TUTTA LA SETTIMANA
-============================================================ */
-
-function applicaSettimana(datiOrario, anno, mese, giorno, datiGiorno) {
+function applicaSettimana(datiOrario, anno, mese, g, datiGiorno) {
   const festivi = getFestivi(anno);
-
-  const date = new Date(anno, mese, giorno);
+  const date = new Date(anno, mese, g);
   const dayOfWeek = date.getDay();
-
   const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-  const lunedi = giorno - offset;
-
+  const lunedi = g - offset;
   for (let i = 0; i < 7; i++) {
-    const g = lunedi + i;
-    if (g < 1) continue;
-
-    const dataCorrente = new Date(anno, mese, g);
+    const giornoCorrente = lunedi + i;
+    if (giornoCorrente < 1) continue;
+    const dataCorrente = new Date(anno, mese, giornoCorrente);
     const weekday = dataCorrente.getDay();
-
-    const keyData = `${anno}-${String(mese+1).padStart(2,"0")}-${String(g).padStart(2,"0")}`;
-
+    const keyData = `${anno}-${String(mese+1).padStart(2,"0")}-${String(giornoCorrente).padStart(2,"0")}`;
     if (weekday === 0 || weekday === 6) continue;
     if (festivi[keyData]) continue;
-
     if (!datiOrario[anno]) datiOrario[anno] = {};
     if (!datiOrario[anno][mese]) datiOrario[anno][mese] = {};
-
-    datiOrario[anno][mese][g] = {
-      ...datiGiorno,
-      note: datiOrario[anno][mese][g]?.note || ""
-    };
+    datiOrario[anno][mese][giornoCorrente] = { ...datiGiorno, note: datiOrario[anno][mese][giornoCorrente]?.note || "" };
   }
 }
 
-/* ============================================================
-   COPIA DAL GIORNO PRECEDENTE
-============================================================ */
-
-function copiaDalGiornoPrecedente(datiOrario, anno, mese, giorno) {
-  const prev = giorno - 1;
+function copiaDalGiornoPrecedente(datiOrario, anno, mese, g) {
+  const prev = g - 1;
   if (prev < 1) return null;
-
   const d = datiOrario[anno]?.[mese]?.[prev];
   if (!d) return null;
-
   return {
     ingressoLavoro: d.ingressoLavoro || "",
     uscitaLavoro: d.uscitaLavoro || "",
-    uscitaPermesso: "",
-    ingressoPermesso: "",
-    uscitaMissione: "",
-    ingressoMissione: "",
+    uscitaPermesso: "", ingressoPermesso: "",
+    uscitaMissione: "", ingressoMissione: "",
     noteGiorno: ""
   };
 }
 
 /* ============================================================
-   VARIABILI GLOBALI
+   VARIABILI GLOBALI E AVVIO
 ============================================================ */
-
 let datiOrario = {};
 const STORAGE_KEY = "orarioLavoroCalendario";
-
 let giornoCorrente = null;
-
-let annoIniziale, meseIniziale;
-let limiteIndietroAnno, limiteIndietroMese;
-let ultimoAnnoConsentito;
-
-/* ============================================================
-   CARICAMENTO E SALVATAGGIO
-============================================================ */
+let annoIniziale, meseIniziale, limiteIndietroAnno, limiteIndietroMese, ultimoAnnoConsentito;
 
 function caricaDati() {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (raw) {
-    try { datiOrario = JSON.parse(raw); }
-    catch { datiOrario = {}; }
-  }
+  if (raw) { try { datiOrario = JSON.parse(raw); } catch { datiOrario = {}; } }
 }
 
 function salvaDati() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(datiOrario));
 }
 
-/* ============================================================
-   FESTIVI
-============================================================ */
-
 function getFestivi(anno) {
   const festivi = {
-    [`${anno}-01-01`]: "Capodanno",
-    [`${anno}-01-06`]: "Epifania",
-    [`${anno}-04-25`]: "Liberazione",
-    [`${anno}-05-01`]: "Lavoro",
-    [`${anno}-06-02`]: "Repubblica",
-    [`${anno}-08-15`]: "Ferragosto",
-    [`${anno}-11-01`]: "Ognissanti",
-    [`${anno}-12-08`]: "Immacolata",
-    [`${anno}-12-25`]: "Natale",
-    [`${anno}-12-26`]: "Santo Stefano",
-    [`${anno}-12-24`]: "Prefestivo",
-    [`${anno}-12-31`]: "Prefestivo"
+    [`${anno}-01-01`]: "Capodanno", [`${anno}-01-06`]: "Epifania",
+    [`${anno}-04-25`]: "Liberazione", [`${anno}-05-01`]: "Lavoro",
+    [`${anno}-06-02`]: "Repubblica", [`${anno}-08-15`]: "Ferragosto",
+    [`${anno}-11-01`]: "Ognissanti", [`${anno}-12-08`]: "Immacolata",
+    [`${anno}-12-25`]: "Natale", [`${anno}-12-26`]: "Santo Stefano",
+    [`${anno}-12-24`]: "Prefestivo", [`${anno}-12-31`]: "Prefestivo"
   };
-
-  const f = Math.floor,
-        G = anno % 19,
-        C = f(anno / 100),
+  const f = Math.floor, G = anno % 19, C = f(anno / 100),
         H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30,
         I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11)),
-        J = (anno + f(anno / 4) + I + 2 - C + f(C / 4)) % 7,
-        L = I - J,
-        mese = 3 + f((L + 40) / 44),
-        giorno = L + 28 - 31 * f(mese / 4);
-
-  const pasqua = `${anno}-${String(mese).padStart(2,"0")}-${String(giorno).padStart(2,"0")}`;
+        J = (anno + f(anno / 4) + I + 2 - C + f(C / 4)) % 7, L = I - J,
+        mese = 3 + f((L + 40) / 44), g = L + 28 - 31 * f(mese / 4);
+  const pasqua = `${anno}-${String(mese).padStart(2,"0")}-${String(g).padStart(2,"0")}`;
   festivi[pasqua] = "Pasqua";
-
-  const d = new Date(anno, mese - 1, giorno + 1);
+  const d = new Date(anno, mese - 1, g + 1);
   const pasquetta = `${anno}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
   festivi[pasquetta] = "Pasquetta";
-
   return festivi;
 }
 
-/* ============================================================
-   AVVIO
-============================================================ */
+function pulisciErroriInput() {
+  document.getElementById("nome").classList.remove("input-error");
+  document.getElementById("cognome").classList.remove("input-error");
+  document.getElementById("exportTooltip").style.display = "none";
+}
 
 window.addEventListener("DOMContentLoaded", () => {
   caricaDati();
-
   const oggi = new Date();
-
   meseIniziale = oggi.getMonth() - 1;
   annoIniziale = oggi.getFullYear();
-  if (meseIniziale < 0) {
-    meseIniziale = 11;
-    annoIniziale--;
-  }
+  if (meseIniziale < 0) { meseIniziale = 11; annoIniziale--; }
 
   const dataLimite = new Date(annoIniziale, meseIniziale, 1);
   dataLimite.setMonth(dataLimite.getMonth() - 3);
   limiteIndietroAnno = dataLimite.getFullYear();
   limiteIndietroMese = dataLimite.getMonth();
-
   ultimoAnnoConsentito = annoIniziale + 10;
 
   popolaAnni(annoIniziale);
-
   document.getElementById("anno").value = annoIniziale;
   document.getElementById("mese").value = meseIniziale;
 
@@ -713,30 +639,18 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("prevMonth").addEventListener("click", () => {
     let mese = parseInt(document.getElementById("mese").value);
     let anno = parseInt(document.getElementById("anno").value);
-
-    if (anno < limiteIndietroAnno) return;
-    if (anno === limiteIndietroAnno && mese <= limiteIndietroMese) return;
-
-    mese--;
-    if (mese < 0) { mese = 11; anno--; }
-
-    document.getElementById("mese").value = mese;
-    document.getElementById("anno").value = anno;
+    if (anno < limiteIndietroAnno || (anno === limiteIndietroAnno && mese <= limiteIndietroMese)) return;
+    mese--; if (mese < 0) { mese = 11; anno--; }
+    document.getElementById("mese").value = mese; document.getElementById("anno").value = anno;
     generaCalendario();
   });
 
   document.getElementById("nextMonth").addEventListener("click", () => {
     let mese = parseInt(document.getElementById("mese").value);
     let anno = parseInt(document.getElementById("anno").value);
-
-    if (anno > ultimoAnnoConsentito) return;
-    if (anno === ultimoAnnoConsentito && mese >= 11) return;
-
-    mese++;
-    if (mese > 11) { mese = 0; anno++; }
-
-    document.getElementById("mese").value = mese;
-    document.getElementById("anno").value = anno;
+    if (anno > ultimoAnnoConsentito || (anno === ultimoAnnoConsentito && mese >= 11)) return;
+    mese++; if (mese > 11) { mese = 0; anno++; }
+    document.getElementById("mese").value = mese; document.getElementById("anno").value = anno;
     generaCalendario();
   });
 
@@ -756,11 +670,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (e.target.id === "modalOverlay") chiudiModal();
   });
 
-  [
-    "ingressoLavoro","uscitaLavoro",
-    "uscitaPermesso","ingressoPermesso",
-    "uscitaMissione","ingressoMissione"
-  ].forEach(id => {
+  ["ingressoLavoro","uscitaLavoro","uscitaPermesso","ingressoPermesso","uscitaMissione","ingressoMissione"].forEach(id => {
     document.getElementById(id).addEventListener("change", aggiornaTotaleGiornoModal);
   });
 
@@ -779,28 +689,19 @@ window.addEventListener("DOMContentLoaded", () => {
   document.getElementById("nextMonth").addEventListener("click", pulisciErroriInput);
   document.getElementById("todayBtn").addEventListener("click", pulisciErroriInput);
   document.getElementById("clearAll").addEventListener("click", pulisciErroriInput);
-
 });
-
-/* ============================================================
-   POPOLA ANNI
-============================================================ */
 
 function popolaAnni(base) {
   const sel = document.getElementById("anno");
   sel.innerHTML = "";
   for (let a = base - 1; a <= base + 10; a++) {
     const opt = document.createElement("option");
-    opt.value = a;
-    opt.textContent = a;
-    sel.appendChild(opt);
+    opt.value = a; opt.textContent = a; sel.appendChild(opt);
   }
 }
-
 /* ============================================================
-   GENERA CALENDARIO
+   DISEGNO CALENDARIO E GESTIONE MODALE
 ============================================================ */
-
 function generaCalendario() {
   const anno = parseInt(document.getElementById("anno").value);
   const mese = parseInt(document.getElementById("mese").value);
@@ -813,18 +714,15 @@ function generaCalendario() {
   tbody.innerHTML = "";
 
   const festivi = getFestivi(anno);
-
   const first = new Date(anno, mese, 1);
   const last = new Date(anno, mese + 1, 0);
   const numGiorni = last.getDate();
 
   let start = first.getDay();
-  if (start === 0) start = 6;
-  else start--;
+  if (start === 0) start = 6; else start--;
 
   let current = 1;
   const totalCells = Math.ceil((start + numGiorni) / 7) * 7;
-
   const oggi = new Date();
 
   for (let i = 0; i < totalCells; i++) {
@@ -845,22 +743,17 @@ function generaCalendario() {
       const keyAnno = String(anno);
       const keyMese = String(mese);
       const datiG = datiOrario[keyAnno]?.[keyMese]?.[g] || null;
-
       const tot = calcolaTotaliGiorno(datiG);
 
       const dataObj = new Date(anno, mese, g);
       const weekday = dataObj.getDay();
       const keyData = `${anno}-${String(mese+1).padStart(2,"0")}-${String(g).padStart(2,"0")}`;
 
-      if (
-        anno === oggi.getFullYear() &&
-        mese === oggi.getMonth() &&
-        g === oggi.getDate()
-      ) {
+      if (anno === oggi.getFullYear() && mese === oggi.getMonth() && g === oggi.getDate()) {
         cell.classList.add("today");
       }
 
-            if (festivi[keyData]) {
+      if (festivi[keyData]) {
         if (festivi[keyData] === "Prefestivo") cell.classList.add("prefestivo");
         else cell.classList.add("holiday");
       }
@@ -878,13 +771,6 @@ function generaCalendario() {
         const totHM = formatMinutesToHM(tot.totale);
         cell.innerHTML += `<div class="day-total">${totHM}</div>`;
         cell.classList.add("day-filled");
-
-        const ore = tot.totale / 60;
-        if (ore <= 2) cell.dataset.ore = "low";
-        else if (ore <= 6) cell.dataset.ore = "mid";
-        else if (ore <= 8) cell.dataset.ore = "high";
-        else cell.dataset.ore = "full";
-
         cell.innerHTML += generaBadgeOre(tot);
       }
 
@@ -892,54 +778,34 @@ function generaCalendario() {
         cell.classList.add("day-incomplete");
       }
 
-      cell.addEventListener("click", () => {
-        apriModal(anno, mese, g);
-      });
-
+      cell.addEventListener("click", () => { apriModal(anno, mese, g); });
       current++;
     }
-
     row.appendChild(cell);
   }
 
   aggiornaRiepilogoMensile();
-  document.getElementById("calendar").classList.add("visible");
 }
-
-/* ============================================================
-   MODALE
-============================================================ */
 
 function apriModal(anno, mese, giorno) {
   giornoCorrente = { anno, mese, giorno };
-
   const d = datiOrario[anno]?.[mese]?.[giorno] || {};
 
   document.getElementById("ingressoLavoro").value = d.ingressoLavoro || "";
   document.getElementById("uscitaLavoro").value = d.uscitaLavoro || "";
-
   document.getElementById("uscitaPermesso").value = d.uscitaPermesso || "";
   document.getElementById("ingressoPermesso").value = d.ingressoPermesso || "";
-
   document.getElementById("uscitaMissione").value = d.uscitaMissione || "";
   document.getElementById("ingressoMissione").value = d.ingressoMissione || "";
-
   document.getElementById("noteGiorno").value = d.note || "";
 
   aggiornaTotaleGiornoModal();
-
   document.getElementById("modalOverlay").classList.add("visible");
-  document.getElementById("modal").classList.add("visible");
 }
 
 function chiudiModal() {
   document.getElementById("modalOverlay").classList.remove("visible");
-  document.getElementById("modal").classList.remove("visible");
 }
-
-/* ============================================================
-   TOTALE GIORNO (MODALE)
-============================================================ */
 
 function aggiornaTotaleGiornoModal() {
   const dati = {
@@ -950,21 +816,11 @@ function aggiornaTotaleGiornoModal() {
     uscitaMissione: document.getElementById("uscitaMissione").value,
     ingressoMissione: document.getElementById("ingressoMissione").value
   };
-
   const tot = calcolaTotaliGiorno(dati);
-
-  const hm = formatMinutesToHM(tot.totale);
-  const dec = formatMinutesToDecimal(tot.totale);
-  document.getElementById("totaleGiornoLabel").textContent = `${hm} — ${dec} ore`;
+  document.getElementById("totaleGiornoLabel").textContent = `${formatMinutesToHM(tot.totale)} — ${formatMinutesToDecimal(tot.totale)} ore`;
 }
-
-/* ============================================================
-   SALVA GIORNO
-============================================================ */
-
 function salvaGiornoCorrente() {
   if (!giornoCorrente) return;
-
   const { anno, mese, giorno } = giornoCorrente;
 
   if (!datiOrario[anno]) datiOrario[anno] = {};
@@ -981,25 +837,14 @@ function salvaGiornoCorrente() {
   };
 
   const t = calcolaTotaliGiorno(d);
-  d.minLavoro = t.lavoro;
-  d.minPermesso = t.permesso;
-  d.minMissione = t.missione;
-  d.totaleMinuti = t.totale;
-
+  d.minLavoro = t.lavoro; d.minPermesso = t.permesso; d.minMissione = t.missione; d.totaleMinuti = t.totale;
   datiOrario[anno][mese][giorno] = d;
 
-  salvaDati();
-  chiudiModal();
-  generaCalendario();
+  salvaDati(); chiudiModal(); generaCalendario();
 }
-
-/* ============================================================
-   CANCELLA GIORNO
-============================================================ */
 
 function cancellaGiornoCorrente() {
   if (!giornoCorrente) return;
-
   const { anno, mese, giorno } = giornoCorrente;
 
   if (confirm("Cancellare tutti i dati di questo giorno?")) {
@@ -1007,40 +852,23 @@ function cancellaGiornoCorrente() {
       delete datiOrario[anno][mese][giorno];
       salvaDati();
     }
-    chiudiModal();
-    generaCalendario();
+    chiudiModal(); generaCalendario();
   }
 }
-
-/* ============================================================
-   COPIA DAL GIORNO PRECEDENTE
-============================================================ */
 
 function copiaGiornoPrec() {
   if (!giornoCorrente) return;
-
   const { anno, mese, giorno } = giornoCorrente;
-
   const d = copiaDalGiornoPrecedente(datiOrario, anno, mese, giorno);
-  if (!d) {
-    alert("Nessun giorno precedente disponibile.");
-    return;
-  }
+  if (!d) { alert("Nessun giorno precedente disponibile."); return; }
 
   document.getElementById("ingressoLavoro").value = d.ingressoLavoro;
   document.getElementById("uscitaLavoro").value = d.uscitaLavoro;
-
-  aggiornaTotaleGiornoModal();
-  salvaGiornoCorrente();
+  aggiornaTotaleGiornoModal(); salvaGiornoCorrente();
 }
-
-/* ============================================================
-   APPLICA A TUTTA LA SETTIMANA
-============================================================ */
 
 function applicaSettimanaCorrente() {
   if (!giornoCorrente) return;
-
   const { anno, mese, giorno } = giornoCorrente;
 
   const d = {
@@ -1054,32 +882,17 @@ function applicaSettimanaCorrente() {
   };
 
   const t = calcolaTotaliGiorno(d);
-  d.minLavoro = t.lavoro;
-  d.minPermesso = t.permesso;
-  d.minMissione = t.missione;
-  d.totaleMinuti = t.totale;
+  d.minLavoro = t.lavoro; d.minPermesso = t.permesso; d.minMissione = t.missione; d.totaleMinuti = t.totale;
 
   applicaSettimana(datiOrario, anno, mese, giorno, d);
-
-  salvaDati();
-  chiudiModal();
-  generaCalendario();
+  salvaDati(); chiudiModal(); generaCalendario();
 }
-
-/* ============================================================
-   RIEPILOGO MENSILE (UI)
-============================================================ */
-
 function aggiornaRiepilogoMensile() {
   const anno = document.getElementById("anno").value;
   const mese = document.getElementById("mese").value;
-
   const last = new Date(anno, parseInt(mese) + 1, 0);
-  const giorniTotali = last.getDate();
-
   const datiMese = datiOrario[anno]?.[mese] || {};
-
-  const r = calcolaRiepilogoMensile(datiMese, giorniTotali);
+  const r = calcolaRiepilogoMensile(datiMese, last.getDate());
 
   document.getElementById("totLavoroH").textContent = Math.floor(r.lavoro / 60);
   document.getElementById("totLavoroM").textContent = r.lavoro % 60;
@@ -1099,62 +912,25 @@ function aggiornaRiepilogoMensile() {
 }
 
 /* ============================================================
-   FIX PER PWA iPHONE — MODALE SCORRIBILE
+   ESPORTA EXCEL E BANNER CONFERMA
 ============================================================ */
-
-function isPWA() {
-  return window.matchMedia('(display-mode: standalone)').matches ||
-         window.navigator.standalone === true;
-}
-
-function aggiornaAltezzaModalePWA() {
-  if (!isPWA()) return;
-
-  const modal = document.getElementById("modal");
-  if (!modal) return;
-
-  // Altezza reale della finestra, corretta anche con tastiera aperta
-  const h = window.innerHeight;
-  modal.style.height = h + "px";
-  modal.style.maxHeight = h + "px";
-}
-
-// Aggiorna quando la modale si apre
-document.getElementById("modalOverlay").addEventListener("transitionend", aggiornaAltezzaModalePWA);
-
-// Aggiorna quando cambia la viewport (tastiera, rotazione, ecc.)
-window.addEventListener("resize", aggiornaAltezzaModalePWA);
-window.addEventListener("orientationchange", aggiornaAltezzaModalePWA);
-
-/* ============================================================
-   ESPORTA EXCEL
-============================================================ */
-
 function esportaExcel() {
   const nome = document.getElementById("nome").value.trim();
   const cognome = document.getElementById("cognome").value.trim();
   const tooltip = document.getElementById("exportTooltip");
 
-  document.getElementById("nome").classList.remove("input-error");
-  document.getElementById("cognome").classList.remove("input-error");
-  tooltip.style.display = "none";
+  pulisciErroriInput();
 
   if (!nome || !cognome) {
     if (!nome) document.getElementById("nome").classList.add("input-error");
     if (!cognome) document.getElementById("cognome").classList.add("input-error");
-
     tooltip.style.display = "block";
-
     setTimeout(() => { tooltip.style.display = "none"; }, 2500);
-
     return;
   }
 
-  tooltip.style.display = "none";
-
   const anno = parseInt(document.getElementById("anno").value);
   const mese = parseInt(document.getElementById("mese").value);
-
   const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
   const nomeFile = `Orario_${mesi[mese]}${anno}_${cognome}_${nome}.xlsx`;
 
@@ -1163,28 +939,20 @@ function esportaExcel() {
   ];
 
   const last = new Date(anno, mese + 1, 0);
-  const numGiorni = last.getDate();
-
   let totaleDecimali = 0;
 
-  for (let g = 1; g <= numGiorni; g++) {
+  for (let g = 1; g <= last.getDate(); g++) {
     const d = datiOrario[anno]?.[mese]?.[g] || {};
     const tot = d.totaleMinuti || 0;
     const dec = parseFloat(formatMinutesToDecimal(tot));
-
     totaleDecimali += dec;
 
     rows.push([
       `${String(g).padStart(2,"0")}/${String(mese+1).padStart(2,"0")}/${anno}`,
-      d.ingressoLavoro || "",
-      d.uscitaLavoro || "",
-      d.uscitaPermesso || "",
-      d.ingressoPermesso || "",
-      d.uscitaMissione || "",
-      d.ingressoMissione || "",
-      d.note || "",
-      formatMinutesToHM(tot),
-      dec.toFixed(2)
+      d.ingressoLavoro || "", d.uscitaLavoro || "",
+      d.uscitaPermesso || "", d.ingressoPermesso || "",
+      d.uscitaMissione || "", d.ingressoMissione || "",
+      d.note || "", formatMinutesToHM(tot), dec.toFixed(2)
     ]);
   }
 
@@ -1192,13 +960,6 @@ function esportaExcel() {
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
-
-  Object.keys(ws).forEach(key => {
-    if (key[0] === '!') return;
-    if (!ws[key].s) ws[key].s = {};
-    if (ws[key].s.protection) delete ws[key].s.protection;
-  });
-
   XLSX.utils.book_append_sheet(wb, ws, "Orario");
   XLSX.writeFile(wb, nomeFile);
 
@@ -1206,23 +967,30 @@ function esportaExcel() {
 
   if (datiOrario[anno] && datiOrario[anno][mese]) {
     delete datiOrario[anno][mese];
-    salvaDati();
-    generaCalendario();
+    salvaDati(); generaCalendario();
   }
 }
-
-/* ============================================================
-   BANNER DI CONFERMA
-============================================================ */
 
 function mostraBanner() {
   const banner = document.getElementById("exportBanner");
   banner.classList.add("visible");
-
-  setTimeout(() => {
-    banner.classList.remove("visible");
-  }, 2500);
+  setTimeout(() => { banner.classList.remove("visible"); }, 2500);
 }
+
+function isPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+
+function aggiornaAltezzaModalePWA() {
+  if (!isPWA()) return;
+  const modal = document.getElementById("modal");
+  if (!modal) return;
+  modal.style.height = window.innerHeight + "px";
+  modal.style.maxHeight = window.innerHeight + "px";
+}
+
+window.addEventListener("resize", aggiornaAltezzaModalePWA);
+window.addEventListener("orientationchange", aggiornaAltezzaModalePWA);
 </script>
 
 </body>
