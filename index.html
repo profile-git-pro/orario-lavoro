@@ -961,14 +961,21 @@ function esportaExcel() {
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, "Orario");
+  // 1. Prima ordiniamo al browser di scaricare il file Excel
   XLSX.writeFile(wb, nomeFile);
 
+  // 2. Mostriamo il banner verde di conferma a schermo
   mostraBanner();
 
-  if (datiOrario[anno] && datiOrario[anno][mese]) {
-    delete datiOrario[anno][mese];
-    salvaDati(); generaCalendario();
-  }
+// 3. SVUOTIAMO IL MESE SOLO DOPO UN PICCOLO RITARDO (Fix Bug)
+  // In questo modo il browser ha il tempo di avviare il download del file
+  setTimeout(() => {
+    if (datiOrario[anno] && datiOrario[anno][mese]) {
+      delete datiOrario[anno][mese];
+      salvaDati();
+      generaCalendario();
+    }
+  }, 1000); // Aspetta 1 secondo prima di ripulire il calendario
 }
 
 function mostraBanner() {
