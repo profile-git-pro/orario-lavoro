@@ -943,41 +943,36 @@ function esportaExcel() {
 
   for (let g = 1; g <= last.getDate(); g++) {
     const d = datiOrario[anno]?.[mese]?.[g] || {};
-    const tot = d.totaleMinuti || 0;
-    const dec = parseFloat(formatMinutesToDecimal(tot));
+    
+    // FIX PROTEZIONE DATI VUOTI: Evita che i valori vuoti mandino in crash lo script
+    const totMinuti = d.totaleMinuti || 0;
+    const dec = parseFloat(formatMinutesToDecimal(totMinuti));
     totaleDecimali += dec;
 
     rows.push([
       `${String(g).padStart(2,"0")}/${String(mese+1).padStart(2,"0")}/${anno}`,
-      d.ingressoLavoro || "", d.uscitaLavoro || "",
-      d.uscitaPermesso || "", d.ingressoPermesso || "",
-      d.uscitaMissione || "", d.ingressoMissione || "",
-      d.note || "", formatMinutesToHM(tot), dec.toFixed(2)
+      d.ingressoLavoro || "", 
+      d.uscitaLavoro || "",
+      d.uscitaPermesso || "", 
+      d.ingressoPermesso || "",
+      d.uscitaMissione || "", 
+      d.ingressoMissione || "",
+      d.note || "", 
+      totMinuti > 0 ? formatMinutesToHM(totMinuti) : "", 
+      totMinuti > 0 ? dec.toFixed(2) : ""
     ]);
   }
 
   rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
 
-  // 1. CREIAMO IL FOGLIO EXCEL
+  // GENERA IL FILE BINARIO SENZA CANCELLARE GLI OGGETTI
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, "Orario");
-
-  // 2. AVVIAMO IL DOWNLOAD IMMEDIATO (Senza blocchi di sicurezza)
+  
+  // SCARICA IMMEDIATAMENTE
   XLSX.writeFile(wb, nomeFile);
-
-  // 3. MOSTRIAMO IL BANNER DI CONFERMA
   mostraBanner();
-
-  // 4. USIAMO UN PICCOLO SEPARATORI PER ANDROID E PC (Soluzione Definitiva)
-  // Svuota la memoria del browser solo dopo che il file è stato fisicamente generato
-  setTimeout(() => {
-    if (datiOrario[anno] && datiOrario[anno][mese]) {
-      delete datiOrario[anno][mese];
-      salvaDati();
-      generaCalendario();
-    }
-  }, 300); 
 }
 
 function mostraBanner() {
