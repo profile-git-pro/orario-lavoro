@@ -1,0 +1,1699 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  <title>Orario di lavoro</title>
+
+  <!-- Libreria Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <style>
+/* ============================
+   STRUTTURA BASE - SNAILY DARK
+============================ */
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 10px;
+  padding: 0;
+  background: #024b34;
+  color: #EAFDF5;
+}
+
+h1, h2 {
+  text-align: center;
+  margin: 5px 0;
+  color: #C5A067;
+}
+
+.container {
+  max-width: 900px;
+  margin: auto;
+}
+
+/* Righe generali */
+.row {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* ============================
+   BLOCCO INFO (Nome/Cognome/Anno/Mese)
+============================ */
+
+/* Info-row a tutta larghezza */
+.info-row {
+  max-width: 100% !important;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.info-row label {
+  width: 120px;
+  text-align: right;
+  margin-right: 10px;
+  font-weight: bold;
+  color: #C5A067;
+}
+
+.info-row input[type="text"],
+.info-row select {
+  flex: 1;
+  width: 100%;
+  padding: 8px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #007A4D;
+  background: #FFFFFF;
+  color: #003322;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* Etichette generiche (per altre righe) */
+label {
+  font-weight: bold;
+  flex: 1;
+  color: #C5A067;
+}
+
+input[type="text"], select {
+  padding: 8px;
+  flex: 2;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 1px solid #007A4D;
+  background: #FFFFFF;
+  color: #003322;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+
+/* ============================
+   PULSANTI - SNAILY PANTONE
+============================ */
+
+.row.buttons-row {
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+}
+
+button {
+  padding: 10px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  border-radius: 14px;
+  border: none;
+  background: #007A4D;
+  color: #FFFFFF;
+  margin-right: 5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.15),
+    0 4px 10px rgba(0,0,0,0.10);
+  flex: 1;
+  justify-content: center;
+  min-width: 160px;
+  text-align: center;
+}
+
+button:hover {
+  background: #00945F;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: scale(0.95);
+  background: #005F3A;
+}
+
+svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Pulsanti nella modale */
+.modal-buttons button,
+.modal-row.buttons-spaced button {
+  width: 100%;
+}
+
+/* ============================
+   CALENDARIO — SNAILY GLASS PRO
+============================ */
+
+#calendar {
+  margin-top: 25px;
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  table-layout: fixed;
+  font-size: 0.9rem;
+
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.25);
+
+  opacity: 0;
+  transform: translateY(20px) scale(0.99);
+  transition: all 0.45s cubic-bezier(.25,.8,.25,1);
+}
+
+#calendar.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Intestazione giorni settimana */
+#calendar thead tr {
+  background: linear-gradient(90deg, #007A4D, #00A86B);
+}
+
+#calendar th {
+  padding: 10px 4px;
+  text-align: center;
+  color: #FFFFFF;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  border-right: 1px solid rgba(255,255,255,0.25);
+}
+
+#calendar th:last-child {
+  border-right: none;
+}
+
+/* Celle generiche */
+#calendar td {
+  position: relative;
+  padding: 10px 4px;
+  text-align: center;
+  vertical-align: top;
+  cursor: pointer;
+  color: #003322;
+  background: rgba(255,255,255,0.85);
+  border-right: 1px solid #E0E0E0;
+  border-bottom: 1px solid #E0E0E0;
+  transition: background 0.18s ease, transform 0.12s ease;
+}
+
+#calendar tr:last-child td {
+  border-bottom: none;
+}
+
+#calendar td:last-child {
+  border-right: none;
+}
+
+/* Celle vuote */
+td.empty {
+  background: rgba(255,255,255,0.35);
+  cursor: default;
+}
+
+/* Hover sui giorni attivi */
+#calendar td:not(.empty):hover {
+  background: #F4FFF9;
+  transform: translateY(-1px);
+}
+
+/* Numero del giorno */
+#calendar td:not(.empty) {
+  font-weight: 600;
+}
+
+/* Giorno di oggi */
+td.today {
+  background: #FFF7D6 !important;
+  box-shadow: inset 0 0 0 2px #C5A067;
+}
+
+/* Sabato / prefestivo */
+td.saturday,
+td.prefestivo {
+  background: #FFE4B5 !important;
+  color: #5A3A00 !important;
+}
+
+/* Domenica / festivo */
+td.sunday,
+td.holiday {
+  background: #FFCDD2 !important;
+  color: #5A0000 !important;
+}
+
+/* Giorno con dati */
+.day-filled {
+  background: #E8FFF3 !important;
+}
+
+/* Icona giorno con dati */
+.day-icon {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #007A4D;
+  background: rgba(255,255,255,0.65);
+  padding: 1px 4px;
+  border-radius: 4px;
+  border: 1px solid #C5A067;
+  backdrop-filter: blur(3px);
+}
+
+/* Barra grafica ore */
+.day-bar {
+  height: 4px;
+  background: linear-gradient(90deg, #00A86B, #C5A067);
+  border-radius: 999px;
+  margin-top: 4px;
+}
+
+/* Totale ore nella cella */
+.day-total {
+  margin-top: 4px;
+  font-size: 0.72rem;
+  color: #004D33;
+}
+
+/* Giorno incompleto */
+.day-incomplete {
+  outline: 2px dashed #FFB300;
+  outline-offset: -3px;
+}
+
+/* Tooltip */
+.tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 51, 34, 0.95);
+  color: #FFFFFF;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+  z-index: 10;
+}
+
+td:hover .tooltip {
+  opacity: 1;
+}
+
+/* ============================
+   RIEPILOGO MENSILE
+============================ */
+
+#riepilogo {
+  margin-top: 15px;
+  padding: 15px;
+  background: #FFFFFF;
+  border-radius: 12px;
+  border-left: 6px solid #007A4D;
+  color: #003322;
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.12),
+    0 4px 8px rgba(0,0,0,0.08);
+}
+
+#riepilogo h3 {
+  margin-top: 0;
+  text-align: center;
+  color: #007A4D;
+}
+
+.riepilogo-grid {
+  display: grid;
+  grid-template-columns: 1.5fr 0.7fr 0.7fr 1fr;
+  row-gap: 8px;
+  column-gap: 10px;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.riepilogo-grid .label {
+  font-weight: 600;
+}
+
+.riepilogo-grid .strong {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.riepilogo-grid .hm,
+.riepilogo-grid .dec {
+  text-align: right;
+  font-family: monospace;
+  font-size: 1rem;
+}
+
+/* ============================
+   MODALE - SNAILY DARK
+============================ */
+
+#modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 122, 77, 0.25);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+#modalOverlay.visible {
+  display: flex;
+  opacity: 1;
+}
+
+#modal {
+  background: #FFFFFF;
+  padding: 15px;
+  border-radius: 12px;
+  max-width: 420px;
+  width: 95%;
+  box-shadow:
+    0 2px 6px rgba(0,0,0,0.18),
+    0 6px 16px rgba(0,0,0,0.16);
+  font-size: 0.9rem;
+  border-top: 6px solid #007A4D;
+  color: #003322;
+}
+
+#modal h3 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  text-align: center;
+  color: #007A4D;
+}
+
+.modal-row {
+  margin-bottom: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.modal-row label {
+  color: #004d33;
+}
+
+.modal-row input[type="time"],
+.modal-row textarea {
+  padding: 6px;
+  font-size: 0.9rem;
+  border-radius: 8px;
+  border: 1px solid #007A4D;
+  background: #FFFFFF;
+  color: #003322;
+}
+
+.modal-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ============================
+   BANNER ESPORTAZIONE
+============================ */
+
+#exportBanner {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(40px);
+  background: #007A4D;
+  color: white;
+  padding: 12px 22px;
+  border-radius: 10px;
+  font-size: 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  opacity: 0;
+  transition: all 0.4s ease;
+  z-index: 99999;
+  pointer-events: none;
+}
+
+#exportBanner.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ============================
+   RESPONSIVE
+============================ */
+
+@media (max-width: 480px) {
+  #calendar th, #calendar td {
+    padding: 5px;
+    font-size: 0.7rem;
+  }
+  button {
+    width: 100%;
+    margin-bottom: 8px;
+  }
+  .row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  label, input, select {
+    width: 100%;
+  }
+  h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.1rem; }
+  #modal {
+    max-width: 95%;
+  }
+}
+
+/* Riepilogo mensile — Glass Panel Verde Snaily */
+#riepilogo {
+  max-width: 480px;
+  margin: 25px auto;
+  padding: 20px 22px;
+
+  background: rgba(0, 122, 77, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+
+  box-shadow: none !important;
+  color: #FFFFFF;
+}
+
+/* Titolo riepilogo più elegante */
+#riepilogo h3 {
+  color: #FFFFFF;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+/* Colore del font */
+#riepilogo,
+#riepilogo * {
+  color: #C5A067 !important;
+}
+
+/* Icona info sui pulsanti */
+.btn-info {
+  position: relative;
+  display: inline-block;
+  margin-left: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  color: #C5A067;
+  font-size: 0.9rem;
+}
+
+/* Tooltip elegante */
+.btn-info .tooltip-info {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 130%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 122, 77, 0.90);
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  transition: opacity 0.25s ease;
+  z-index: 9999;
+  backdrop-filter: blur(4px);
+}
+
+/* Freccia del tooltip */
+.btn-info .tooltip-info::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-width: 6px;
+  border-style: solid;
+  border-color: rgba(0,122,77,0.90) transparent transparent transparent;
+}
+
+/* Mostra tooltip al passaggio */
+.btn-info:hover .tooltip-info {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ============================
+   HEATMAP ORE — Snaily Green
+============================ */
+
+td.day-filled[data-ore="low"] {
+  background: #E8FFF3 !important;
+}
+
+td.day-filled[data-ore="mid"] {
+  background: #CFFFE7 !important;
+}
+
+td.day-filled[data-ore="high"] {
+  background: #B5FFD9 !important;
+}
+
+td.day-filled[data-ore="full"] {
+  background: #9AFFCC !important;
+}
+
+/* ============================
+   BADGE ORE — mini etichetta
+============================ */
+
+.day-badge {
+  position: absolute;
+  top: 8px;
+  right: 2px;
+  background: rgba(0, 122, 77, 0.85);
+  color: white;
+  padding: 1px 6px;
+  font-size: 0.68rem;
+  border-radius: 6px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  border: 1px solid #C5A067;
+  backdrop-filter: blur(4px);
+  z-index: 5;
+  white-space: nowrap;
+}
+
+.input-error {
+  border: 2px solid #FF4444 !important;
+  box-shadow: 0 0 6px rgba(255, 68, 68, 0.7) !important;
+  animation: shake 0.25s ease;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+  </style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
+</head>
+
+<body>
+<div class="container">
+
+  <h1>Orario di lavoro</h1>
+  <h2 id="titoloMese"></h2>
+
+  <!-- DATI PERSONALI -->
+  <div class="row info-row">
+    <label>Nome:</label>
+    <input type="text" id="nome">
+  </div>
+
+  <div class="row info-row">
+    <label>Cognome:</label>
+    <input type="text" id="cognome">
+  </div>
+
+  <!-- SELEZIONE ANNO -->
+  <div class="row info-row">
+    <label>Anno:</label>
+    <select id="anno"></select>
+  </div>
+
+  <!-- SELEZIONE MESE -->
+  <div class="row info-row">
+    <label>Mese:</label>
+    <select id="mese">
+      <option value="0">Gennaio</option>
+      <option value="1">Febbraio</option>
+      <option value="2">Marzo</option>
+      <option value="3">Aprile</option>
+      <option value="4">Maggio</option>
+      <option value="5">Giugno</option>
+      <option value="6">Luglio</option>
+      <option value="7">Agosto</option>
+      <option value="8">Settembre</option>
+      <option value="9">Ottobre</option>
+      <option value="10">Novembre</option>
+      <option value="11">Dicembre</option>
+    </select>
+  </div>
+
+  <!-- NAVIGAZIONE MESE -->
+  <div class="row buttons-row">
+    <button id="prevMonth">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" d="M15 19l-7-7 7-7"/>
+      </svg>
+      Mese precedente
+      <span class="btn-info">ⓘ
+        <span class="tooltip-info">Passa al mese precedente</span>
+      </span>
+    </button>
+
+    <button id="nextMonth">
+      Mese successivo
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" d="M9 5l7 7-7 7"/>
+      </svg>
+      <span class="btn-info">ⓘ
+        <span class="tooltip-info">Passa al mese successivo</span>
+      </span>
+    </button>
+
+    <button id="todayBtn">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8" stroke-width="2"/>
+      </svg>
+      Oggi
+      <span class="btn-info">ⓘ
+        <span class="tooltip-info">Và alla data odierna</span>
+      </span>
+    </button>
+  </div>
+
+  <!-- ESPORTA / RESET -->
+  <div class="row buttons-row">
+    <button id="exportExcel">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M4 17h16"/>
+      </svg>
+      Esporta in Excel
+      <span class="btn-info">ⓘ
+        <span class="tooltip-info">Genera il file Excel del mese.<br>Necessario scrivere <b>nome</b> e <b>cognome</b></span>
+      </span>
+      <span id="exportTooltip" class="tooltip-info" style="display:none; position:absolute; margin-top:40px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); padding:8px 12px; border-radius:8px; color:white; font-size:0.8rem; white-space:nowrap; z-index:9999;">
+        Inserire Nome e Cognome per esportare
+      </span>
+    </button>
+
+    <button id="resetPage">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" d="M4 4v6h6M20 20v-6h-6M4 10a8 8 0 0116 0M20 14a8 8 0 01-16 0"/>
+      </svg>
+      Reimposta
+      <span class="btn-info">ⓘ
+        <span class="tooltip-info">Ritorna al mese iniziale</span>
+      </span>
+    </button>
+
+    <button id="clearAll">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-width="2" d="M3 6h18M9 6v12m6-12v12M4 6l1 14h14l1-14"/>
+      </svg>
+      Cancella tutto
+      <span class="btn-info">ⓘ
+        <span class="tooltip-info">Ripristina la pagina per ricompilare</span>
+      </span>
+    </button>
+  </div>
+
+  <!-- CALENDARIO -->
+  <table id="calendar">
+    <thead>
+      <tr>
+        <th>Lunedì</th><th>Martedì</th><th>Mercoledì</th><th>Giovedì</th><th>Venerdì</th><th>Sabato</th><th>Domenica</th>
+      </tr>
+    </thead>
+    <tbody id="calendarBody"></tbody>
+  </table>
+
+  <!-- RIEPILOGO MENSILE AVANZATO -->
+  <div id="riepilogo">
+    <h3>Riepilogo mensile</h3>
+
+    <div class="riepilogo-grid">
+      <div class="label">Ore di lavoro</div>
+      <div class="hm"><span id="totLavoroH">0</span> h</div>
+      <div class="hm"><span id="totLavoroM">0</span> m</div>
+      <div class="dec"><span id="totLavoroDec">0.00</span></div>
+
+      <div class="label">Ore di permesso</div>
+      <div class="hm"><span id="totPermessoH">0</span> h</div>
+      <div class="hm"><span id="totPermessoM">0</span> m</div>
+      <div class="dec"><span id="totPermessoDec">0.00</span></div>
+
+      <div class="label">Ore di missione</div>
+      <div class="hm"><span id="totMissioneH">0</span> h</div>
+      <div class="hm"><span id="totMissioneM">0</span> m</div>
+      <div class="dec"><span id="totMissioneDec">0.00</span></div>
+
+      <div class="label strong">Totale</div>
+      <div class="hm strong"><span id="totaleH">0</span> h</div>
+      <div class="hm strong"><span id="totaleM">0</span> m</div>
+      <div class="dec strong"><span id="totaleDec">0.00</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- MODALE AVANZATA -->
+<div id="modalOverlay">
+  <div id="modal">
+
+    <h3 id="modalTitle">Dettagli giorno</h3>
+
+    <!-- CAMPI ORARI -->
+    <div class="modal-row">
+      <label>Ingresso al lavoro</label>
+      <input type="time" id="ingressoLavoro">
+    </div>
+
+    <div class="modal-row">
+      <label>Uscita dal lavoro</label>
+      <input type="time" id="uscitaLavoro">
+    </div>
+
+    <div class="modal-row">
+      <label>Uscita per il permesso</label>
+      <input type="time" id="uscitaPermesso">
+    </div>
+
+    <div class="modal-row">
+      <label>Rientro dal permesso</label>
+      <input type="time" id="ingressoPermesso">
+    </div>
+
+    <div class="modal-row">
+      <label>Uscita per la missione</label>
+      <input type="time" id="uscitaMissione">
+    </div>
+
+    <div class="modal-row">
+      <label>Rientro dalla missione</label>
+      <input type="time" id="ingressoMissione">
+    </div>
+
+    <!-- NOTE -->
+    <div class="modal-row">
+      <label>Note</label>
+      <textarea id="noteGiorno"></textarea>
+    </div>
+
+    <!-- RIEPILOGO GIORNO -->
+    <div class="modal-row">
+      <label>Totale giornaliero</label>
+      <div id="totaleGiornoLabel">0h 0m — 0.00 ore</div>
+    </div>
+
+    <!-- NUOVI PULSANTI -->
+    <div class="modal-row buttons-spaced">
+      <button id="copiaGiornoPrec">Copia dal giorno precedente</button>
+      <button id="applicaSettimana">Applica a tutta la settimana</button>
+    </div>
+
+    <!-- PULSANTI FINALI -->
+    <div class="modal-buttons">
+      <button id="salvaGiorno">Salva</button>
+      <button id="cancellaGiorno">Cancella dati</button>
+      <button id="chiudiModal">Annulla</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   FUNZIONI DI SUPPORTO
+============================================================ */
+
+function parseTimeToMinutes(t) {
+  if (!t) return 0;
+  const parts = t.split(":");
+  if (parts.length !== 2) return 0;
+  const h = parseInt(parts[0], 10);
+  const m = parseInt(parts[1], 10);
+  if (isNaN(h) || isNaN(m)) return 0;
+  return h * 60 + m;
+}
+
+function diffMinutes(start, end) {
+  if (!start || !end) return 0;
+  const s = parseTimeToMinutes(start);
+  const e = parseTimeToMinutes(end);
+  if (e <= s) return 0;
+  return e - s;
+}
+
+/* ============================================================
+   CALCOLO ORE GIORNALIERE
+============================================================ */
+
+function calcolaTotaliGiorno(dati) {
+  if (!dati) {
+    return { lavoro: 0, permesso: 0, missione: 0, totale: 0 };
+  }
+
+  const lavoro = diffMinutes(dati.ingressoLavoro, dati.uscitaLavoro);
+
+  let permesso = 0;
+  if (dati.uscitaPermesso && dati.ingressoPermesso) {
+    permesso = diffMinutes(dati.uscitaPermesso, dati.ingressoPermesso);
+  }
+
+  let missione = 0;
+  if (dati.uscitaMissione && dati.ingressoMissione) {
+    missione = diffMinutes(dati.uscitaMissione, dati.ingressoMissione);
+  }
+
+  let totale = lavoro - permesso;
+  if (totale < 0) totale = 0;
+
+  return { lavoro, permesso, missione, totale };
+}
+
+/* ============================================================
+   BADGE ORE
+============================================================ */
+
+function generaBadgeOre(datiG) {
+  if (!datiG || !datiG.totale) return "";
+  const dec = (datiG.totale / 60).toFixed(2);
+  return `<div class="day-badge">${dec} h</div>`;
+}
+
+/* ============================================================
+   TOOLTIP GIORNO
+============================================================ */
+
+function generaTooltip(datiG) {
+  if (!datiG) return "";
+
+  return `
+    <div class="tooltip">
+      Lavoro: ${formatMinutesToHM(datiG.lavoro)}<br>
+      Permesso: -${formatMinutesToHM(datiG.permesso)}<br>
+      Missione: ${formatMinutesToHM(datiG.missione)}<br>
+      <strong>Totale: ${formatMinutesToHM(datiG.totale)}</strong>
+    </div>
+  `;
+}
+
+function formatMinutesToHM(min) {
+  const h = Math.floor(min / 60);
+  const m = min % 60;
+  return `${h}h ${m}m`;
+}
+
+function formatMinutesToDecimal(min) {
+  return (min / 60).toFixed(2);
+}
+
+/* ============================================================
+   TOOLTIP GIORNALIERO (vecchia versione, non usata)
+============================================================ */
+
+function creaTooltip(dati) {
+  if (!dati) return "";
+
+  const tot = dati.totaleMinuti || 0;
+  const lavoro = dati.minLavoro || 0;
+  const permesso = dati.minPermesso || 0;
+  const missione = dati.minMissione || 0;
+
+  return `
+    <div class="tooltip">
+      Lavoro: ${formatMinutesToHM(lavoro)}<br>
+      Permesso: ${formatMinutesToHM(permesso)}<br>
+      Missione: ${formatMinutesToHM(missione)}<br>
+      <strong>Totale: ${formatMinutesToHM(tot)}</strong>
+    </div>
+  `;
+}
+
+/* ============================================================
+   ICONA GIORNO CON DATI
+============================================================ */
+
+function creaIconaGiorno(tot) {
+  if (!tot || !tot.totale || tot.totale === 0) return "";
+  return `<span class="day-icon">✓</span>`;
+}
+
+/* ============================================================
+   BARRA GRAFICA ORE
+============================================================ */
+
+function creaBarraOre(tot) {
+  if (!tot || !tot.totale || tot.totale === 0) return "";
+  const percent = Math.min(100, (tot.totale / 480) * 100);
+  return `<div class="day-bar" style="width:${percent}%"></div>`;
+}
+
+/* ============================================================
+   GIORNO INCOMPLETO
+============================================================ */
+
+function isGiornoIncompleto(dati) {
+  if (!dati) return false;
+  const inL = dati.ingressoLavoro;
+  const outL = dati.uscitaLavoro;
+  if ((inL && !outL) || (!inL && outL)) return true;
+  return false;
+}
+
+/* ============================================================
+   CALCOLO RIEPILOGO MENSILE AVANZATO
+============================================================ */
+
+function calcolaRiepilogoMensile(datiMese, giorniTotali) {
+  let totLav = 0;
+  let totPerm = 0;
+  let totMis = 0;
+  let tot = 0;
+  let giorniConPresenza = 0;
+
+  for (const g in datiMese) {
+    const d = datiMese[g];
+    const t = calcolaTotaliGiorno(d);
+
+    totLav += t.lavoro;
+    totPerm += t.permesso;
+    totMis += t.missione;
+    tot += t.totale;
+
+    if (t.totale > 0) giorniConPresenza++;
+  }
+
+  const media = giorniConPresenza > 0 ? (tot / 60) / giorniConPresenza : 0;
+  const presenza = giorniTotali > 0 ? (giorniConPresenza / giorniTotali) * 100 : 0;
+
+  return {
+    lavoro: totLav,
+    permesso: totPerm,
+    missione: totMis,
+    totale: tot,
+    media,
+    presenza
+  };
+}
+
+/* ============================================================
+   APPLICA A TUTTA LA SETTIMANA
+============================================================ */
+
+function applicaSettimana(datiOrario, anno, mese, giorno, datiGiorno) {
+  const festivi = getFestivi(anno);
+
+  const date = new Date(anno, mese, giorno);
+  const dayOfWeek = date.getDay();
+
+  const offset = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  const lunedi = giorno - offset;
+
+  for (let i = 0; i < 7; i++) {
+    const g = lunedi + i;
+    if (g < 1) continue;
+
+    const dataCorrente = new Date(anno, mese, g);
+    const weekday = dataCorrente.getDay();
+
+    const keyData = `${anno}-${String(mese+1).padStart(2,"0")}-${String(g).padStart(2,"0")}`;
+
+    if (weekday === 0 || weekday === 6) continue;
+    if (festivi[keyData]) continue;
+
+    if (!datiOrario[anno]) datiOrario[anno] = {};
+    if (!datiOrario[anno][mese]) datiOrario[anno][mese] = {};
+
+    datiOrario[anno][mese][g] = {
+      ...datiGiorno,
+      note: datiOrario[anno][mese][g]?.note || ""
+    };
+  }
+}
+
+/* ============================================================
+   COPIA DAL GIORNO PRECEDENTE
+============================================================ */
+
+function copiaDalGiornoPrecedente(datiOrario, anno, mese, giorno) {
+  const prev = giorno - 1;
+  if (prev < 1) return null;
+
+  const d = datiOrario[anno]?.[mese]?.[prev];
+  if (!d) return null;
+
+  return {
+    ingressoLavoro: d.ingressoLavoro || "",
+    uscitaLavoro: d.uscitaLavoro || "",
+    uscitaPermesso: "",
+    ingressoPermesso: "",
+    uscitaMissione: "",
+    ingressoMissione: "",
+    noteGiorno: ""
+  };
+}
+
+/* ============================================================
+   VARIABILI GLOBALI
+============================================================ */
+
+let datiOrario = {};
+const STORAGE_KEY = "orarioLavoroCalendario";
+
+let giornoCorrente = null;
+
+let annoIniziale, meseIniziale;
+let limiteIndietroAnno, limiteIndietroMese;
+let ultimoAnnoConsentito;
+
+/* ============================================================
+   CARICAMENTO E SALVATAGGIO
+============================================================ */
+
+function caricaDati() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (raw) {
+    try { datiOrario = JSON.parse(raw); }
+    catch { datiOrario = {}; }
+  }
+}
+
+function salvaDati() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(datiOrario));
+}
+
+/* ============================================================
+   FESTIVI
+============================================================ */
+
+function getFestivi(anno) {
+  const festivi = {
+    [`${anno}-01-01`]: "Capodanno",
+    [`${anno}-01-06`]: "Epifania",
+    [`${anno}-04-25`]: "Liberazione",
+    [`${anno}-05-01`]: "Lavoro",
+    [`${anno}-06-02`]: "Repubblica",
+    [`${anno}-08-15`]: "Ferragosto",
+    [`${anno}-11-01`]: "Ognissanti",
+    [`${anno}-12-08`]: "Immacolata",
+    [`${anno}-12-25`]: "Natale",
+    [`${anno}-12-26`]: "Santo Stefano",
+    [`${anno}-12-24`]: "Prefestivo",
+    [`${anno}-12-31`]: "Prefestivo"
+  };
+
+  const f = Math.floor,
+        G = anno % 19,
+        C = f(anno / 100),
+        H = (C - f(C / 4) - f((8 * C + 13) / 25) + 19 * G + 15) % 30,
+        I = H - f(H / 28) * (1 - f(29 / (H + 1)) * f((21 - G) / 11)),
+        J = (anno + f(anno / 4) + I + 2 - C + f(C / 4)) % 7,
+        L = I - J,
+        mese = 3 + f((L + 40) / 44),
+        giorno = L + 28 - 31 * f(mese / 4);
+
+  const pasqua = `${anno}-${String(mese).padStart(2,"0")}-${String(giorno).padStart(2,"0")}`;
+  festivi[pasqua] = "Pasqua";
+
+  const d = new Date(anno, mese - 1, giorno + 1);
+  const pasquetta = `${anno}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  festivi[pasquetta] = "Pasquetta";
+
+  return festivi;
+}
+
+function pulisciErroriInput() {
+  const nome = document.getElementById("nome");
+  const cognome = document.getElementById("cognome");
+  const tooltip = document.getElementById("exportTooltip");
+
+  nome.classList.remove("input-error");
+  cognome.classList.remove("input-error");
+
+  nome.style.animation = "none";
+  cognome.style.animation = "none";
+
+  requestAnimationFrame(() => {
+    nome.style.animation = "";
+    cognome.style.animation = "";
+  });
+
+  tooltip.style.display = "none";
+}
+
+/* ============================================================
+   AVVIO
+============================================================ */
+
+window.addEventListener("DOMContentLoaded", () => {
+  caricaDati();
+
+  const oggi = new Date();
+
+  meseIniziale = oggi.getMonth() - 1;
+  annoIniziale = oggi.getFullYear();
+  if (meseIniziale < 0) {
+    meseIniziale = 11;
+    annoIniziale--;
+  }
+
+  const dataLimite = new Date(annoIniziale, meseIniziale, 1);
+  dataLimite.setMonth(dataLimite.getMonth() - 3);
+  limiteIndietroAnno = dataLimite.getFullYear();
+  limiteIndietroMese = dataLimite.getMonth();
+
+  ultimoAnnoConsentito = annoIniziale + 10;
+
+  popolaAnni(annoIniziale);
+
+  document.getElementById("anno").value = annoIniziale;
+  document.getElementById("mese").value = meseIniziale;
+
+  generaCalendario();
+
+  document.getElementById("anno").addEventListener("change", generaCalendario);
+  document.getElementById("mese").addEventListener("change", generaCalendario);
+
+  document.getElementById("todayBtn").addEventListener("click", () => {
+    const o = new Date();
+    document.getElementById("anno").value = o.getFullYear();
+    document.getElementById("mese").value = o.getMonth();
+    generaCalendario();
+  });
+
+  document.getElementById("prevMonth").addEventListener("click", () => {
+    let mese = parseInt(document.getElementById("mese").value);
+    let anno = parseInt(document.getElementById("anno").value);
+
+    if (anno < limiteIndietroAnno) return;
+    if (anno === limiteIndietroAnno && mese <= limiteIndietroMese) return;
+
+    mese--;
+    if (mese < 0) { mese = 11; anno--; }
+
+    document.getElementById("mese").value = mese;
+    document.getElementById("anno").value = anno;
+    generaCalendario();
+  });
+
+  document.getElementById("nextMonth").addEventListener("click", () => {
+    let mese = parseInt(document.getElementById("mese").value);
+    let anno = parseInt(document.getElementById("anno").value);
+
+    if (anno > ultimoAnnoConsentito) return;
+    if (anno === ultimoAnnoConsentito && mese >= 11) return;
+
+    mese++;
+    if (mese > 11) { mese = 0; anno++; }
+
+    document.getElementById("mese").value = mese;
+    document.getElementById("anno").value = anno;
+    generaCalendario();
+  });
+
+  document.getElementById("resetPage").addEventListener("click", () => {
+    document.getElementById("anno").value = annoIniziale;
+    document.getElementById("mese").value = meseIniziale;
+    generaCalendario();
+  });
+
+  document.getElementById("chiudiModal").addEventListener("click", chiudiModal);
+  document.getElementById("salvaGiorno").addEventListener("click", salvaGiornoCorrente);
+  document.getElementById("cancellaGiorno").addEventListener("click", cancellaGiornoCorrente);
+  document.getElementById("copiaGiornoPrec").addEventListener("click", copiaGiornoPrec);
+  document.getElementById("applicaSettimana").addEventListener("click", applicaSettimanaCorrente);
+
+  document.getElementById("modalOverlay").addEventListener("click", (e) => {
+    if (e.target.id === "modalOverlay") chiudiModal();
+  });
+
+  [
+    "ingressoLavoro","uscitaLavoro",
+    "uscitaPermesso","ingressoPermesso",
+    "uscitaMissione","ingressoMissione"
+  ].forEach(id => {
+    document.getElementById(id).addEventListener("change", aggiornaTotaleGiornoModal);
+  });
+
+  document.getElementById("exportExcel").addEventListener("click", esportaExcel);
+
+  document.getElementById("clearAll").addEventListener("click", () => {
+    if (confirm("Cancellare TUTTI i dati salvati?")) {
+      localStorage.removeItem(STORAGE_KEY);
+      datiOrario = {};
+      generaCalendario();
+    }
+  });
+
+  document.getElementById("resetPage").addEventListener("click", pulisciErroriInput);
+  document.getElementById("prevMonth").addEventListener("click", pulisciErroriInput);
+  document.getElementById("nextMonth").addEventListener("click", pulisciErroriInput);
+  document.getElementById("todayBtn").addEventListener("click", pulisciErroriInput);
+  document.getElementById("clearAll").addEventListener("click", pulisciErroriInput);
+
+});
+
+/* ============================================================
+   POPOLA ANNI
+============================================================ */
+
+function popolaAnni(base) {
+  const sel = document.getElementById("anno");
+  sel.innerHTML = "";
+  for (let a = base - 1; a <= base + 10; a++) {
+    const opt = document.createElement("option");
+    opt.value = a;
+    opt.textContent = a;
+    sel.appendChild(opt);
+  }
+}
+
+/* ============================================================
+   GENERA CALENDARIO
+============================================================ */
+
+function generaCalendario() {
+  const anno = parseInt(document.getElementById("anno").value);
+  const mese = parseInt(document.getElementById("mese").value);
+
+  const titolo = document.getElementById("titoloMese");
+  const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+  titolo.textContent = `${mesi[mese]} ${anno}`;
+
+  const tbody = document.getElementById("calendarBody");
+  tbody.innerHTML = "";
+
+  const festivi = getFestivi(anno);
+
+  const first = new Date(anno, mese, 1);
+  const last = new Date(anno, mese + 1, 0);
+  const numGiorni = last.getDate();
+
+  let start = first.getDay();
+  if (start === 0) start = 6;
+  else start--;
+
+  let current = 1;
+  const totalCells = Math.ceil((start + numGiorni) / 7) * 7;
+
+  const oggi = new Date();
+
+  for (let i = 0; i < totalCells; i++) {
+    if (i % 7 === 0) {
+      var row = document.createElement("tr");
+      tbody.appendChild(row);
+    }
+
+    const cell = document.createElement("td");
+
+    if (i < start || current > numGiorni) {
+      cell.classList.add("empty");
+      cell.textContent = "";
+    } else {
+      const g = current;
+      cell.textContent = g;
+
+      const keyAnno = String(anno);
+      const keyMese = String(mese);
+      const datiG = datiOrario[keyAnno]?.[keyMese]?.[g] || null;
+
+      const tot = calcolaTotaliGiorno(datiG);
+
+      const dataObj = new Date(anno, mese, g);
+      const weekday = dataObj.getDay();
+      const keyData = `${anno}-${String(mese+1).padStart(2,"0")}-${String(g).padStart(2,"0")}`;
+
+      if (
+        anno === oggi.getFullYear() &&
+        mese === oggi.getMonth() &&
+        g === oggi.getDate()
+      ) {
+        cell.classList.add("today");
+      }
+
+      if (festivi[keyData]) {
+        if (festivi[keyData] === "Prefestivo") cell.classList.add("prefestivo");
+        else cell.classList.add("holiday");
+      }
+
+      if (weekday === 6) cell.classList.add("saturday");
+      if (weekday === 0) cell.classList.add("sunday");
+
+      cell.innerHTML += creaIconaGiorno(tot);
+      cell.innerHTML += creaBarraOre(tot);
+
+      const tooltip = generaTooltip(tot);
+      if (tooltip) cell.innerHTML += tooltip;
+
+      if (tot.totale > 0) {
+        const totHM = formatMinutesToHM(tot.totale);
+        cell.innerHTML += `<div class="day-total">${totHM}</div>`;
+        cell.classList.add("day-filled");
+
+        const ore = tot.totale / 60;
+        if (ore <= 2) cell.dataset.ore = "low";
+        else if (ore <= 6) cell.dataset.ore = "mid";
+        else if (ore <= 8) cell.dataset.ore = "high";
+        else cell.dataset.ore = "full";
+
+        cell.innerHTML += generaBadgeOre(tot);
+      }
+
+      if (isGiornoIncompleto(datiG)) {
+        cell.classList.add("day-incomplete");
+      }
+
+      cell.addEventListener("click", () => {
+        apriModal(anno, mese, g);
+      });
+
+      current++;
+    }
+
+    row.appendChild(cell);
+  }
+
+  aggiornaRiepilogoMensile();
+  document.getElementById("calendar").classList.add("visible");
+}
+
+/* ============================================================
+   MODALE
+============================================================ */
+
+function apriModal(anno, mese, giorno) {
+  giornoCorrente = { anno, mese, giorno };
+
+  const d = datiOrario[anno]?.[mese]?.[giorno] || {};
+
+  document.getElementById("ingressoLavoro").value = d.ingressoLavoro || "";
+  document.getElementById("uscitaLavoro").value = d.uscitaLavoro || "";
+
+  document.getElementById("uscitaPermesso").value = d.uscitaPermesso || "";
+  document.getElementById("ingressoPermesso").value = d.ingressoPermesso || "";
+
+  document.getElementById("uscitaMissione").value = d.uscitaMissione || "";
+  document.getElementById("ingressoMissione").value = d.ingressoMissione || "";
+
+  document.getElementById("noteGiorno").value = d.note || "";
+
+  aggiornaTotaleGiornoModal();
+
+  document.getElementById("modalOverlay").classList.add("visible");
+  document.getElementById("modal").classList.add("visible");
+}
+
+function chiudiModal() {
+  document.getElementById("modalOverlay").classList.remove("visible");
+  document.getElementById("modal").classList.remove("visible");
+}
+
+/* ============================================================
+   TOTALE GIORNO (MODALE)
+============================================================ */
+
+function aggiornaTotaleGiornoModal() {
+  const dati = {
+    ingressoLavoro: document.getElementById("ingressoLavoro").value,
+    uscitaLavoro: document.getElementById("uscitaLavoro").value,
+    uscitaPermesso: document.getElementById("uscitaPermesso").value,
+    ingressoPermesso: document.getElementById("ingressoPermesso").value,
+    uscitaMissione: document.getElementById("uscitaMissione").value,
+    ingressoMissione: document.getElementById("ingressoMissione").value
+  };
+
+  const tot = calcolaTotaliGiorno(dati);
+
+  const hm = formatMinutesToHM(tot.totale);
+  const dec = formatMinutesToDecimal(tot.totale);
+  document.getElementById("totaleGiornoLabel").textContent = `${hm} — ${dec} ore`;
+}
+
+/* ============================================================
+   SALVA GIORNO
+============================================================ */
+
+function salvaGiornoCorrente() {
+  if (!giornoCorrente) return;
+
+  const { anno, mese, giorno } = giornoCorrente;
+
+  if (!datiOrario[anno]) datiOrario[anno] = {};
+  if (!datiOrario[anno][mese]) datiOrario[anno][mese] = {};
+
+  const d = {
+    ingressoLavoro: document.getElementById("ingressoLavoro").value,
+    uscitaLavoro: document.getElementById("uscitaLavoro").value,
+    uscitaPermesso: document.getElementById("uscitaPermesso").value,
+    ingressoPermesso: document.getElementById("ingressoPermesso").value,
+    uscitaMissione: document.getElementById("uscitaMissione").value,
+    ingressoMissione: document.getElementById("ingressoMissione").value,
+    note: document.getElementById("noteGiorno").value
+  };
+
+  const t = calcolaTotaliGiorno(d);
+  d.minLavoro = t.lavoro;
+  d.minPermesso = t.permesso;
+  d.minMissione = t.missione;
+  d.totaleMinuti = t.totale;
+
+  datiOrario[anno][mese][giorno] = d;
+
+  salvaDati();
+  chiudiModal();
+  generaCalendario();
+}
+
+/* ============================================================
+   CANCELLA GIORNO
+============================================================ */
+
+function cancellaGiornoCorrente() {
+  if (!giornoCorrente) return;
+
+  const { anno, mese, giorno } = giornoCorrente;
+
+  if (confirm("Cancellare tutti i dati di questo giorno?")) {
+    if (datiOrario[anno]?.[mese]?.[giorno]) {
+      delete datiOrario[anno][mese][giorno];
+      salvaDati();
+    }
+    chiudiModal();
+    generaCalendario();
+  }
+}
+
+/* ============================================================
+   COPIA DAL GIORNO PRECEDENTE
+============================================================ */
+
+function copiaGiornoPrec() {
+  if (!giornoCorrente) return;
+
+  const { anno, mese, giorno } = giornoCorrente;
+
+  const d = copiaDalGiornoPrecedente(datiOrario, anno, mese, giorno);
+  if (!d) {
+    alert("Nessun giorno precedente disponibile.");
+    return;
+  }
+
+  document.getElementById("ingressoLavoro").value = d.ingressoLavoro;
+  document.getElementById("uscitaLavoro").value = d.uscitaLavoro;
+
+  aggiornaTotaleGiornoModal();
+  salvaGiornoCorrente();
+}
+
+/* ============================================================
+   APPLICA A TUTTA LA SETTIMANA
+============================================================ */
+
+function applicaSettimanaCorrente() {
+  if (!giornoCorrente) return;
+
+  const { anno, mese, giorno } = giornoCorrente;
+
+  const d = {
+    ingressoLavoro: document.getElementById("ingressoLavoro").value,
+    uscitaLavoro: document.getElementById("uscitaLavoro").value,
+    uscitaPermesso: document.getElementById("uscitaPermesso").value,
+    ingressoPermesso: document.getElementById("ingressoPermesso").value,
+    uscitaMissione: document.getElementById("uscitaMissione").value,
+    ingressoMissione: document.getElementById("ingressoMissione").value,
+    note: document.getElementById("noteGiorno").value
+  };
+
+  const t = calcolaTotaliGiorno(d);
+  d.minLavoro = t.lavoro;
+  d.minPermesso = t.permesso;
+  d.minMissione = t.missione;
+  d.totaleMinuti = t.totale;
+
+  applicaSettimana(datiOrario, anno, mese, giorno, d);
+
+  salvaDati();
+  chiudiModal();
+  generaCalendario();
+}
+
+/* ============================================================
+   RIEPILOGO MENSILE (UI)
+============================================================ */
+
+function aggiornaRiepilogoMensile() {
+  const anno = document.getElementById("anno").value;
+  const mese = document.getElementById("mese").value;
+
+  const last = new Date(anno, parseInt(mese) + 1, 0);
+  const giorniTotali = last.getDate();
+
+  const datiMese = datiOrario[anno]?.[mese] || {};
+
+  const r = calcolaRiepilogoMensile(datiMese, giorniTotali);
+
+  document.getElementById("totLavoroH").textContent = Math.floor(r.lavoro / 60);
+  document.getElementById("totLavoroM").textContent = r.lavoro % 60;
+  document.getElementById("totLavoroDec").textContent = formatMinutesToDecimal(r.lavoro);
+
+  document.getElementById("totPermessoH").textContent = Math.floor(r.permesso / 60);
+  document.getElementById("totPermessoM").textContent = r.permesso % 60;
+  document.getElementById("totPermessoDec").textContent = formatMinutesToDecimal(r.permesso);
+
+  document.getElementById("totMissioneH").textContent = Math.floor(r.missione / 60);
+  document.getElementById("totMissioneM").textContent = r.missione % 60;
+  document.getElementById("totMissioneDec").textContent = formatMinutesToDecimal(r.missione);
+
+  document.getElementById("totaleH").textContent = Math.floor(r.totale / 60);
+  document.getElementById("totaleM").textContent = r.totale % 60;
+  document.getElementById("totaleDec").textContent = formatMinutesToDecimal(r.totale);
+}
+
+/* ============================================================
+   ESPORTA EXCEL
+============================================================ */
+
+function esportaExcel() {
+  const nome = document.getElementById("nome").value.trim();
+  const cognome = document.getElementById("cognome").value.trim();
+  const tooltip = document.getElementById("exportTooltip");
+
+  document.getElementById("nome").classList.remove("input-error");
+  document.getElementById("cognome").classList.remove("input-error");
+  tooltip.style.display = "none";
+
+  if (!nome || !cognome) {
+    if (!nome) document.getElementById("nome").classList.add("input-error");
+    if (!cognome) document.getElementById("cognome").classList.add("input-error");
+
+    tooltip.style.display = "block";
+
+    setTimeout(() => { tooltip.style.display = "none"; }, 2500);
+
+    return;
+  }
+
+  tooltip.style.display = "none";
+
+  const anno = parseInt(document.getElementById("anno").value);
+  const mese = parseInt(document.getElementById("mese").value);
+
+  const mesi = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno","Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+  const nomeFile = `Orario_${mesi[mese]}${anno}_${cognome}_${nome}.xlsx`;
+
+  const rows = [
+    ["Data", "Ingresso Lavoro", "Uscita Lavoro", "Uscita Permesso", "Ingresso Permesso", "Uscita Missione", "Ingresso Missione", "Note", "Totale (h:m)", "Totale (decimale)"]
+  ];
+
+  const last = new Date(anno, mese + 1, 0);
+  const numGiorni = last.getDate();
+
+  let totaleDecimali = 0;
+
+  for (let g = 1; g <= numGiorni; g++) {
+    const d = datiOrario[anno]?.[mese]?.[g] || {};
+    const tot = d.totaleMinuti || 0;
+    const dec = parseFloat(formatMinutesToDecimal(tot));
+
+    totaleDecimali += dec;
+
+    rows.push([
+      `${String(g).padStart(2,"0")}/${String(mese+1).padStart(2,"0")}/${anno}`,
+      d.ingressoLavoro || "",
+      d.uscitaLavoro || "",
+      d.uscitaPermesso || "",
+      d.ingressoPermesso || "",
+      d.uscitaMissione || "",
+      d.ingressoMissione || "",
+      d.note || "",
+      formatMinutesToHM(tot),
+      dec.toFixed(2)
+    ]);
+  }
+
+  rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  Object.keys(ws).forEach(key => {
+    if (key[0] === '!') return;
+    if (!ws[key].s) ws[key].s = {};
+    if (ws[key].s.protection) delete ws[key].s.protection;
+  });
+
+  XLSX.utils.book_append_sheet(wb, ws, "Orario");
+  XLSX.writeFile(wb, nomeFile);
+
+  mostraBanner();
+
+  if (datiOrario[anno] && datiOrario[anno][mese]) {
+    delete datiOrario[anno][mese];
+    salvaDati();
+    generaCalendario();
+  }
+}
+
+/* ============================================================
+   BANNER DI CONFERMA
+============================================================ */
+
+function mostraBanner() {
+  const banner = document.getElementById("exportBanner");
+  banner.classList.add("visible");
+
+  setTimeout(() => {
+    banner.classList.remove("visible");
+  }, 2500);
+}
+</script>
+
+<div id="exportBanner">Esportazione in Excel completata</div>
+
+</body>
+</html>
