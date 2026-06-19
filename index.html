@@ -42,15 +42,11 @@ h1, h2 {
 }
 
 /* ============================
-   BLOCCO INFO (Nome/Cognome/Anno/Mese)
+   BLOCCO INFO
 ============================ */
 
-/* Info-row a tutta larghezza */
 .info-row {
-  max-width: 100% !important;
   width: 100%;
-  margin-left: 0;
-  margin-right: 0;
 }
 
 .info-row label {
@@ -64,42 +60,21 @@ h1, h2 {
 .info-row input[type="text"],
 .info-row select {
   flex: 1;
-  width: 100%;
   padding: 8px;
   font-size: 1rem;
   border-radius: 10px;
   border: 1px solid #007A4D;
   background: #FFFFFF;
   color: #003322;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
-}
-
-/* Etichette generiche (per altre righe) */
-label {
-  font-weight: bold;
-  flex: 1;
-  color: #C5A067;
-}
-
-input[type="text"], select {
-  padding: 8px;
-  flex: 2;
-  font-size: 1rem;
-  border-radius: 10px;
-  border: 1px solid #007A4D;
-  background: #FFFFFF;
-  color: #003322;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
 }
 
 /* ============================
-   PULSANTI - SNAILY PANTONE
+   PULSANTI
 ============================ */
 
 .row.buttons-row {
   display: flex;
   gap: 10px;
-  align-items: stretch;
 }
 
 button {
@@ -110,261 +85,54 @@ button {
   border: none;
   background: #007A4D;
   color: #FFFFFF;
-  margin-right: 5px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.25s ease;
-  box-shadow:
-    0 2px 4px rgba(0,0,0,0.15),
-    0 4px 10px rgba(0,0,0,0.10);
   flex: 1;
-  justify-content: center;
   min-width: 160px;
-  text-align: center;
-}
-
-button:hover {
-  background: #00945F;
-  transform: translateY(-2px);
-}
-
-button:active {
-  transform: scale(0.95);
-  background: #005F3A;
-}
-
-svg {
-  width: 20px;
-  height: 20px;
-}
-
-/* Pulsanti nella modale */
-.modal-buttons button,
-.modal-row.buttons-spaced button {
-  width: 100%;
 }
 
 /* ============================
-   CALENDARIO — SNAILY GLASS PRO
+   CALENDARIO
 ============================ */
 
 #calendar {
   margin-top: 25px;
+  width: 100%;
   border-collapse: separate;
   border-spacing: 0;
-  width: 100%;
-  table-layout: fixed;
-  font-size: 0.9rem;
-
-  background: rgba(255, 255, 255, 0.10);
+  background: rgba(255,255,255,0.10);
   backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
   border-radius: 18px;
   overflow: hidden;
-  box-shadow:
-    0 8px 20px rgba(0, 0, 0, 0.25);
-
-  opacity: 0;
-  transform: translateY(20px) scale(0.99);
-  transition: all 0.45s cubic-bezier(.25,.8,.25,1);
-}
-
-#calendar.visible {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-/* Intestazione giorni settimana */
-#calendar thead tr {
-  background: linear-gradient(90deg, #007A4D, #00A86B);
 }
 
 #calendar th {
+  background: linear-gradient(90deg, #007A4D, #00A86B);
   padding: 10px 4px;
-  text-align: center;
-  color: #FFFFFF;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  border-right: 1px solid rgba(255,255,255,0.25);
+  color: white;
 }
 
-#calendar th:last-child {
-  border-right: none;
-}
-
-/* Celle generiche */
 #calendar td {
-  position: relative;
+  background: rgba(255,255,255,0.85);
   padding: 10px 4px;
   text-align: center;
-  vertical-align: top;
   cursor: pointer;
-  color: #003322;
-  background: rgba(255,255,255,0.85);
-  border-right: 1px solid #E0E0E0;
-  border-bottom: 1px solid #E0E0E0;
-  transition: background 0.18s ease, transform 0.12s ease;
-}
-
-#calendar tr:last-child td {
-  border-bottom: none;
-}
-
-#calendar td:last-child {
-  border-right: none;
-}
-
-/* Celle vuote */
-td.empty {
-  background: rgba(255,255,255,0.35);
-  cursor: default;
-}
-
-/* Hover sui giorni attivi */
-#calendar td:not(.empty):hover {
-  background: #F4FFF9;
-  transform: translateY(-1px);
-}
-
-/* Numero del giorno */
-#calendar td:not(.empty) {
-  font-weight: 600;
-}
-
-/* Giorno di oggi */
-td.today {
-  background: #FFF7D6 !important;
-  box-shadow: inset 0 0 0 2px #C5A067;
-}
-
-/* Sabato / prefestivo */
-td.saturday,
-td.prefestivo {
-  background: #FFE4B5 !important;
-  color: #5A3A00 !important;
-}
-
-/* Domenica / festivo */
-td.sunday,
-td.holiday {
-  background: #FFCDD2 !important;
-  color: #5A0000 !important;
-}
-
-/* Giorno con dati */
-.day-filled {
-  background: #E8FFF3 !important;
-}
-
-/* Icona giorno con dati */
-.day-icon {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  color: #007A4D;
-  background: rgba(255,255,255,0.65);
-  padding: 1px 4px;
-  border-radius: 4px;
-  border: 1px solid #C5A067;
-  backdrop-filter: blur(3px);
-}
-
-/* Barra grafica ore */
-.day-bar {
-  height: 4px;
-  background: linear-gradient(90deg, #00A86B, #C5A067);
-  border-radius: 999px;
-  margin-top: 4px;
-}
-
-/* Totale ore nella cella */
-.day-total {
-  margin-top: 4px;
-  font-size: 0.72rem;
-  color: #004D33;
-}
-
-/* Giorno incompleto */
-.day-incomplete {
-  outline: 2px dashed #FFB300;
-  outline-offset: -3px;
-}
-
-/* Tooltip */
-.tooltip {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 51, 34, 0.95);
-  color: #FFFFFF;
-  padding: 6px 10px;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.18s ease;
-  z-index: 10;
-}
-
-td:hover .tooltip {
-  opacity: 1;
+  position: relative;
 }
 
 /* ============================
-   RIEPILOGO MENSILE
+   RIEPILOGO
 ============================ */
 
 #riepilogo {
   margin-top: 15px;
   padding: 15px;
-  background: #FFFFFF;
-  border-radius: 12px;
-  border-left: 6px solid #007A4D;
-  color: #003322;
-  box-shadow:
-    0 1px 3px rgba(0,0,0,0.12),
-    0 4px 8px rgba(0,0,0,0.08);
-}
-
-#riepilogo h3 {
-  margin-top: 0;
-  text-align: center;
-  color: #007A4D;
-}
-
-.riepilogo-grid {
-  display: grid;
-  grid-template-columns: 1.5fr 0.7fr 0.7fr 1fr;
-  row-gap: 8px;
-  column-gap: 10px;
-  align-items: center;
-  font-size: 0.95rem;
-}
-
-.riepilogo-grid .label {
-  font-weight: 600;
-}
-
-.riepilogo-grid .strong {
-  font-weight: 700;
-  font-size: 1rem;
-}
-
-.riepilogo-grid .hm,
-.riepilogo-grid .dec {
-  text-align: right;
-  font-family: monospace;
-  font-size: 1rem;
+  background: rgba(0, 122, 77, 0.25);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  color: #C5A067;
 }
 
 /* ============================
-   MODALE - SNAILY DARK
+   MODALE — VERSIONE UNIVERSALE
 ============================ */
 
 #modalOverlay {
@@ -390,263 +158,65 @@ td:hover .tooltip {
   border-radius: 12px;
   max-width: 420px;
   width: 95%;
-  box-shadow:
-    0 2px 6px rgba(0,0,0,0.18),
-    0 6px 16px rgba(0,0,0,0.16);
-  font-size: 0.9rem;
-  border-top: 6px solid #007A4D;
   color: #003322;
+  border-top: 6px solid #007A4D;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
 }
 
-#modal h3 {
-  margin-top: 0;
-  margin-bottom: 10px;
-  text-align: center;
-  color: #007A4D;
+.modal-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-row {
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-}
-
-.modal-row label {
-  color: #004d33;
-}
-
-.modal-row input[type="time"],
-.modal-row textarea {
-  padding: 6px;
-  font-size: 0.9rem;
-  border-radius: 8px;
-  border: 1px solid #007A4D;
-  background: #FFFFFF;
-  color: #003322;
 }
 
 .modal-buttons {
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 /* ============================
-   BANNER ESPORTAZIONE
+   MOBILE + PWA FIX
 ============================ */
 
-#exportBanner {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%) translateY(40px);
-  background: #007A4D;
-  color: white;
-  padding: 12px 22px;
-  border-radius: 10px;
-  font-size: 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  opacity: 0;
-  transition: all 0.4s ease;
-  z-index: 99999;
-  pointer-events: none;
-}
+@media (max-width: 768px) {
 
-#exportBanner.visible {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-/* ============================
-   RESPONSIVE
-============================ */
-
-@media (max-width: 480px) {
-  #calendar th, #calendar td {
-    padding: 5px;
-    font-size: 0.7rem;
-  }
-  button {
-    width: 100%;
-    margin-bottom: 8px;
-  }
-  .row {
-    flex-direction: column;
+  #modalOverlay {
     align-items: flex-start;
   }
-  label, input, select {
+
+  #modal {
     width: 100%;
+    max-width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    padding: 12px 12px 80px;
   }
-  h1 { font-size: 1.4rem; }
-  h2 { font-size: 1.1rem; }
-  #modal {
-    max-width: 95%;
+
+  .modal-buttons {
+    position: fixed;
+    bottom: env(safe-area-inset-bottom, 10px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 24px);
+    max-width: 420px;
+    background: rgba(255,255,255,0.95);
+    backdrop-filter: blur(10px);
+    padding: 10px;
+    border-radius: 12px;
+    z-index: 10000;
   }
-}
-
-/* Riepilogo mensile — Glass Panel Verde Snaily */
-#riepilogo {
-  max-width: 480px;
-  margin: 25px auto;
-  padding: 20px 22px;
-
-  background: rgba(0, 122, 77, 0.25);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-
-  border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-
-  box-shadow: none !important;
-  color: #FFFFFF;
-}
-
-/* Titolo riepilogo più elegante */
-#riepilogo h3 {
-  color: #FFFFFF;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.25);
-}
-
-/* Colore del font */
-#riepilogo,
-#riepilogo * {
-  color: #C5A067 !important;
-}
-
-/* Icona info sui pulsanti */
-.btn-info {
-  position: relative;
-  display: inline-block;
-  margin-left: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  color: #C5A067;
-  font-size: 0.9rem;
-}
-
-/* Tooltip elegante */
-.btn-info .tooltip-info {
-  visibility: hidden;
-  opacity: 0;
-  position: absolute;
-  bottom: 130%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 122, 77, 0.90);
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  white-space: nowrap;
-  font-size: 0.8rem;
-  transition: opacity 0.25s ease;
-  z-index: 9999;
-  backdrop-filter: blur(4px);
-}
-
-/* Freccia del tooltip */
-.btn-info .tooltip-info::after {
-  content: "";
-  position: absolute;
-  top: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px;
-  border-style: solid;
-  border-color: rgba(0,122,77,0.90) transparent transparent transparent;
-}
-
-/* Mostra tooltip al passaggio */
-.btn-info:hover .tooltip-info {
-  visibility: visible;
-  opacity: 1;
-}
-
-/* ============================
-   HEATMAP ORE — Snaily Green
-============================ */
-
-td.day-filled[data-ore="low"] {
-  background: #E8FFF3 !important;
-}
-
-td.day-filled[data-ore="mid"] {
-  background: #CFFFE7 !important;
-}
-
-td.day-filled[data-ore="high"] {
-  background: #B5FFD9 !important;
-}
-
-td.day-filled[data-ore="full"] {
-  background: #9AFFCC !important;
-}
-
-/* ============================
-   BADGE ORE — mini etichetta
-============================ */
-
-.day-badge {
-  position: absolute;
-  top: 8px;
-  right: 2px;
-  background: rgba(0, 122, 77, 0.85);
-  color: white;
-  padding: 1px 6px;
-  font-size: 0.68rem;
-  border-radius: 6px;
-  font-weight: 600;
-  letter-spacing: 0.3px;
-  border: 1px solid #C5A067;
-  backdrop-filter: blur(4px);
-  z-index: 5;
-  white-space: nowrap;
-}
-
-.input-error {
-  border: 2px solid #FF4444 !important;
-  box-shadow: 0 0 6px rgba(255, 68, 68, 0.7) !important;
-  animation: shake 0.25s ease;
-}
-
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-3px); }
-  50% { transform: translateX(3px); }
-  75% { transform: translateX(-3px); }
-  100% { transform: translateX(0); }
-}
-
-/* Rende la modale scrollabile su iPhone/Android */
-#modal {
-  max-height: 75vh;              /* si adatta allo schermo */
-  overflow-y: auto;              /* scroll interno */
-  -webkit-overflow-scrolling: touch;
-  padding-bottom: 90px;          /* spazio per i bottoni */
-}
-
-/* Bottoni sempre visibili */
-.modal-buttons {
-  position: sticky;
-  bottom: 0;
-  background: rgba(255,255,255,0.9);
-  backdrop-filter: blur(10px);
-  padding: 10px;
-  z-index: 10;
-}
-
-/* Fix specifico per iPhone PWA */
-@supports (-webkit-touch-callout: none) {
-  #modal {
-    max-height: 70vh;
-  }
-}
-
-/* Evita che il body si muova con la tastiera */
-html, body {
-  height: 100%;
-  overflow: hidden;
 }
 
   </style>
@@ -680,13 +250,11 @@ html, body {
     <input type="text" id="cognome">
   </div>
 
-  <!-- SELEZIONE ANNO -->
   <div class="row info-row">
     <label>Anno:</label>
     <select id="anno"></select>
   </div>
 
-  <!-- SELEZIONE MESE -->
   <div class="row info-row">
     <label>Mese:</label>
     <select id="mese">
@@ -705,73 +273,18 @@ html, body {
     </select>
   </div>
 
-  <!-- NAVIGAZIONE MESE -->
+  <!-- NAVIGAZIONE -->
   <div class="row buttons-row">
-    <button id="prevMonth">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-width="2" d="M15 19l-7-7 7-7"/>
-      </svg>
-      Mese precedente
-      <span class="btn-info">ⓘ
-        <span class="tooltip-info">Passa al mese precedente</span>
-      </span>
-    </button>
-
-    <button id="nextMonth">
-      Mese successivo
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-width="2" d="M9 5l7 7-7 7"/>
-      </svg>
-      <span class="btn-info">ⓘ
-        <span class="tooltip-info">Passa al mese successivo</span>
-      </span>
-    </button>
-
-    <button id="todayBtn">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="8" stroke-width="2"/>
-      </svg>
-      Oggi
-      <span class="btn-info">ⓘ
-        <span class="tooltip-info">Và alla data odierna</span>
-      </span>
-    </button>
+    <button id="prevMonth">Mese precedente</button>
+    <button id="nextMonth">Mese successivo</button>
+    <button id="todayBtn">Oggi</button>
   </div>
 
   <!-- ESPORTA / RESET -->
   <div class="row buttons-row">
-    <button id="exportExcel">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-width="2" d="M12 3v12m0 0l-4-4m4 4l4-4M4 17h16"/>
-      </svg>
-      Esporta in Excel
-      <span class="btn-info">ⓘ
-        <span class="tooltip-info">Genera il file Excel del mese.<br>Necessario scrivere <b>nome</b> e <b>cognome</b></span>
-      </span>
-      <span id="exportTooltip" class="tooltip-info" style="display:none; position:absolute; margin-top:40px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); padding:8px 12px; border-radius:8px; color:white; font-size:0.8rem; white-space:nowrap; z-index:9999;">
-        Inserire Nome e Cognome per esportare
-      </span>
-    </button>
-
-    <button id="resetPage">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-width="2" d="M4 4v6h6M20 20v-6h-6M4 10a8 8 0 0116 0M20 14a8 8 0 01-16 0"/>
-      </svg>
-      Reimposta
-      <span class="btn-info">ⓘ
-        <span class="tooltip-info">Ritorna al mese iniziale</span>
-      </span>
-    </button>
-
-    <button id="clearAll">
-      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-width="2" d="M3 6h18M9 6v12m6-12v12M4 6l1 14h14l1-14"/>
-      </svg>
-      Cancella tutto
-      <span class="btn-info">ⓘ
-        <span class="tooltip-info">Ripristina la pagina per ricompilare</span>
-      </span>
-    </button>
+    <button id="exportExcel">Esporta in Excel</button>
+    <button id="resetPage">Reimposta</button>
+    <button id="clearAll">Cancella tutto</button>
   </div>
 
   <!-- CALENDARIO -->
@@ -784,10 +297,9 @@ html, body {
     <tbody id="calendarBody"></tbody>
   </table>
 
-  <!-- RIEPILOGO MENSILE AVANZATO -->
+  <!-- RIEPILOGO -->
   <div id="riepilogo">
     <h3>Riepilogo mensile</h3>
-
     <div class="riepilogo-grid">
       <div class="label">Ore di lavoro</div>
       <div class="hm"><span id="totLavoroH">0</span> h</div>
@@ -813,62 +325,61 @@ html, body {
 
 </div>
 
-<!-- MODALE AVANZATA -->
+<!-- MODALE UNIVERSALE -->
 <div id="modalOverlay">
   <div id="modal">
 
     <h3 id="modalTitle">Dettagli giorno</h3>
 
-    <!-- CAMPI ORARI -->
-    <div class="modal-row">
-      <label>Ingresso al lavoro</label>
-      <input type="time" id="ingressoLavoro">
+    <div class="modal-scroll">
+
+      <div class="modal-row">
+        <label>Ingresso al lavoro</label>
+        <input type="time" id="ingressoLavoro">
+      </div>
+
+      <div class="modal-row">
+        <label>Uscita dal lavoro</label>
+        <input type="time" id="uscitaLavoro">
+      </div>
+
+      <div class="modal-row">
+        <label>Uscita per il permesso</label>
+        <input type="time" id="uscitaPermesso">
+      </div>
+
+      <div class="modal-row">
+        <label>Rientro dal permesso</label>
+        <input type="time" id="ingressoPermesso">
+      </div>
+
+      <div class="modal-row">
+        <label>Uscita per la missione</label>
+        <input type="time" id="uscitaMissione">
+      </div>
+
+      <div class="modal-row">
+        <label>Rientro dalla missione</label>
+        <input type="time" id="ingressoMissione">
+      </div>
+
+      <div class="modal-row">
+        <label>Note</label>
+        <textarea id="noteGiorno"></textarea>
+      </div>
+
+      <div class="modal-row">
+        <label>Totale giornaliero</label>
+        <div id="totaleGiornoLabel">0h 0m — 0.00 ore</div>
+      </div>
+
+      <div class="modal-row buttons-spaced">
+        <button id="copiaGiornoPrec">Copia dal giorno precedente</button>
+        <button id="applicaSettimana">Applica a tutta la settimana</button>
+      </div>
+
     </div>
 
-    <div class="modal-row">
-      <label>Uscita dal lavoro</label>
-      <input type="time" id="uscitaLavoro">
-    </div>
-
-    <div class="modal-row">
-      <label>Uscita per il permesso</label>
-      <input type="time" id="uscitaPermesso">
-    </div>
-
-    <div class="modal-row">
-      <label>Rientro dal permesso</label>
-      <input type="time" id="ingressoPermesso">
-    </div>
-
-    <div class="modal-row">
-      <label>Uscita per la missione</label>
-      <input type="time" id="uscitaMissione">
-    </div>
-
-    <div class="modal-row">
-      <label>Rientro dalla missione</label>
-      <input type="time" id="ingressoMissione">
-    </div>
-
-    <!-- NOTE -->
-    <div class="modal-row">
-      <label>Note</label>
-      <textarea id="noteGiorno"></textarea>
-    </div>
-
-    <!-- RIEPILOGO GIORNO -->
-    <div class="modal-row">
-      <label>Totale giornaliero</label>
-      <div id="totaleGiornoLabel">0h 0m — 0.00 ore</div>
-    </div>
-
-    <!-- NUOVI PULSANTI -->
-    <div class="modal-row buttons-spaced">
-      <button id="copiaGiornoPrec">Copia dal giorno precedente</button>
-      <button id="applicaSettimana">Applica a tutta la settimana</button>
-    </div>
-
-    <!-- PULSANTI FINALI -->
     <div class="modal-buttons">
       <button id="salvaGiorno">Salva</button>
       <button id="cancellaGiorno">Cancella dati</button>
@@ -878,6 +389,7 @@ html, body {
   </div>
 </div>
 
+<div id="exportBanner">Esportazione in Excel completata</div>
 <script>
 /* ============================================================
    FUNZIONI DI SUPPORTO
@@ -966,28 +478,6 @@ function formatMinutesToDecimal(min) {
 }
 
 /* ============================================================
-   TOOLTIP GIORNALIERO (vecchia versione, non usata)
-============================================================ */
-
-function creaTooltip(dati) {
-  if (!dati) return "";
-
-  const tot = dati.totaleMinuti || 0;
-  const lavoro = dati.minLavoro || 0;
-  const permesso = dati.minPermesso || 0;
-  const missione = dati.minMissione || 0;
-
-  return `
-    <div class="tooltip">
-      Lavoro: ${formatMinutesToHM(lavoro)}<br>
-      Permesso: ${formatMinutesToHM(permesso)}<br>
-      Missione: ${formatMinutesToHM(missione)}<br>
-      <strong>Totale: ${formatMinutesToHM(tot)}</strong>
-    </div>
-  `;
-}
-
-/* ============================================================
    ICONA GIORNO CON DATI
 ============================================================ */
 
@@ -1019,7 +509,7 @@ function isGiornoIncompleto(dati) {
 }
 
 /* ============================================================
-   CALCOLO RIEPILOGO MENSILE AVANZATO
+   CALCOLO RIEPILOGO MENSILE
 ============================================================ */
 
 function calcolaRiepilogoMensile(datiMese, giorniTotali) {
@@ -1178,25 +668,6 @@ function getFestivi(anno) {
   festivi[pasquetta] = "Pasquetta";
 
   return festivi;
-}
-
-function pulisciErroriInput() {
-  const nome = document.getElementById("nome");
-  const cognome = document.getElementById("cognome");
-  const tooltip = document.getElementById("exportTooltip");
-
-  nome.classList.remove("input-error");
-  cognome.classList.remove("input-error");
-
-  nome.style.animation = "none";
-  cognome.style.animation = "none";
-
-  requestAnimationFrame(() => {
-    nome.style.animation = "";
-    cognome.style.animation = "";
-  });
-
-  tooltip.style.display = "none";
 }
 
 /* ============================================================
@@ -1389,7 +860,7 @@ function generaCalendario() {
         cell.classList.add("today");
       }
 
-      if (festivi[keyData]) {
+            if (festivi[keyData]) {
         if (festivi[keyData] === "Prefestivo") cell.classList.add("prefestivo");
         else cell.classList.add("holiday");
       }
@@ -1628,6 +1099,34 @@ function aggiornaRiepilogoMensile() {
 }
 
 /* ============================================================
+   FIX PER PWA iPHONE — MODALE SCORRIBILE
+============================================================ */
+
+function isPWA() {
+  return window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone === true;
+}
+
+function aggiornaAltezzaModalePWA() {
+  if (!isPWA()) return;
+
+  const modal = document.getElementById("modal");
+  if (!modal) return;
+
+  // Altezza reale della finestra, corretta anche con tastiera aperta
+  const h = window.innerHeight;
+  modal.style.height = h + "px";
+  modal.style.maxHeight = h + "px";
+}
+
+// Aggiorna quando la modale si apre
+document.getElementById("modalOverlay").addEventListener("transitionend", aggiornaAltezzaModalePWA);
+
+// Aggiorna quando cambia la viewport (tastiera, rotazione, ecc.)
+window.addEventListener("resize", aggiornaAltezzaModalePWA);
+window.addEventListener("orientationchange", aggiornaAltezzaModalePWA);
+
+/* ============================================================
    ESPORTA EXCEL
 ============================================================ */
 
@@ -1725,8 +1224,6 @@ function mostraBanner() {
   }, 2500);
 }
 </script>
-
-<div id="exportBanner">Esportazione in Excel completata</div>
 
 </body>
 </html>
