@@ -618,32 +618,32 @@ td.day-filled[data-ore="full"] {
   100% { transform: translateX(0); }
 }
 
-    /* Modal responsive per mobile e PWA */
-.modal-content {
-  max-height: 75vh;
-  overflow-y: auto;
-  padding-bottom: 90px;
+/* Rende la modale scrollabile su iPhone/Android */
+#modal {
+  max-height: 75vh;              /* si adatta allo schermo */
+  overflow-y: auto;              /* scroll interno */
   -webkit-overflow-scrolling: touch;
+  padding-bottom: 90px;          /* spazio per i bottoni */
 }
 
-/* Footer sempre visibile */
-.modal-footer {
+/* Bottoni sempre visibili */
+.modal-buttons {
   position: sticky;
   bottom: 0;
-  background: rgba(20,20,20,0.85);
-  backdrop-filter: blur(12px);
-  padding: 12px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  padding: 10px;
   z-index: 10;
 }
 
 /* Fix specifico per iPhone PWA */
 @supports (-webkit-touch-callout: none) {
-  .modal-content {
+  #modal {
     max-height: 70vh;
   }
 }
 
-/* Evita che tutto il body si muova con la tastiera */
+/* Evita che il body si muova con la tastiera */
 html, body {
   height: 100%;
   overflow: hidden;
