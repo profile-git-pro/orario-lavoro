@@ -1008,9 +1008,12 @@ function esportaExcel() {
     salvaDati();
   }
 
-  // Svuota i campi di testo del Nome e del Cognome
-  if (nomeInput) nomeInput.value = "";
-  if (cognomeInput) cognomeInput.value = "";
+  // 2. Forza lo svuotamento delle caselle Nome e Cognome usando direttamente gli ID
+  const campoNome = document.getElementById("nome");
+  const campoCognome = document.getElementById("cognome");
+  
+  if (campoNome) campoNome.value = "";
+  if (campoCognome) campoCognome.value = "";
 
   // Ridisegna il calendario vuoto e azzera i contatori del riepilogo
   generaCalendario();
