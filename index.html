@@ -912,7 +912,7 @@ function aggiornaRiepilogoMensile() {
 }
 
 /* ============================================================
-   ESPORTA EXCEL E BANNER CONFERMA
+   ESPORTA EXCEL E BANNER CONFERMA - COMPATIBILITÀ UNIVERSALE
 ============================================================ */
 function esportaExcel() {
   const nome = document.getElementById("nome").value.trim();
@@ -944,8 +944,6 @@ function esportaExcel() {
 
   for (let g = 1; g <= numGiorni; g++) {
     const d = datiOrario[anno]?.[mese]?.[g] || {};
-    
-    // Ripristinato il calcolo sicuro dei minuti per evitare crash sui giorni vuoti
     const tot = d.totaleMinuti || 0;
     const dec = parseFloat(formatMinutesToDecimal(tot));
     totaleDecimali += dec;
@@ -966,23 +964,22 @@ function esportaExcel() {
 
   rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
 
-  // Generazione e download immediato dell'Excel
+  // Generazione del foglio senza manipolazioni strane delle celle
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
   XLSX.utils.book_append_sheet(wb, ws, "Orario");
+
+  // Forza il download immediato (riconosciuto da PC e Android come azione utente sicura)
   XLSX.writeFile(wb, nomeFile);
 
-  // Mostra il banner di conferma
   mostraBanner();
 
-  // CANCELLAZIONE DEI DATI SALVATI (Ripristinata e resa sicura per PC e Android)
-  setTimeout(() => {
-    if (datiOrario[anno] && datiOrario[anno][mese]) {
-      delete datiOrario[anno][mese];
-      salvaDati();
-      generaCalendario();
-    }
-  }, 300);
+  // Pulizia della memoria locale e reset visivo sul portale
+  if (datiOrario[anno] && datiOrario[anno][mese]) {
+    delete datiOrario[anno][mese];
+    salvaDati();
+    generaCalendario();
+  }
 }
 
 function mostraBanner() {
