@@ -929,7 +929,7 @@ function aggiornaRiepilogoMensile() {
 }
 
 /* ============================================================
-   ESPORTA EXCEL E BANNER CONFERMA - COMPATIBILITÀ UNIVERSALE
+   ESPORTA EXCEL COMPLETO CON RESET TOTALE DELLA PAGINA
 ============================================================ */
 function esportaExcel() {
   const nomeInput = document.getElementById("nome");
@@ -986,17 +986,17 @@ function esportaExcel() {
 
   mostraBanner();
 
-  // CANCELLAZIONE ORE E RESET PAGINA
+  // 1. Cancella le ore del mese dalla memoria locale
   if (datiOrario[anno] && datiOrario[anno][mese]) {
     delete datiOrario[anno][mese];
     salvaDati();
   }
 
-  // SVUOTAMENTO CAMPI DI TESTO
+  // 2. Svuota i box di testo del Nome e Cognome
   if (nomeInput) nomeInput.value = "";
   if (cognomeInput) cognomeInput.value = "";
 
-  // AGGIORNAMENTO GRAFICA CALENDARIO
+  // 3. Ridisegna il calendario vuoto ed esegue il reset visivo
   generaCalendario();
 }
 
