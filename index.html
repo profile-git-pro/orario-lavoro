@@ -932,19 +932,14 @@ function aggiornaRiepilogoMensile() {
    ESPORTA EXCEL E BANNER CONFERMA - COMPATIBILITÀ UNIVERSALE
 ============================================================ */
 function esportaExcel() {
-  // Raccogliamo i dati pulendoli dagli spazi
   const nomeInput = document.getElementById("nome");
   const cognomeInput = document.getElementById("cognome");
   const nome = nomeInput ? nomeInput.value.trim() : "";
   const cognome = cognomeInput ? cognomeInput.value.trim() : "";
   const tooltip = document.getElementById("exportTooltip");
 
-  // Rimuoviamo gli errori precedenti in modo sicuro
-  if (nomeInput) nomeInput.classList.remove("input-error");
-  if (cognomeInput) cognomeInput.classList.remove("input-error");
-  if (tooltip) tooltip.style.display = "none";
+  pulisciErroriInput();
 
-  // Controllo dei campi obbligatori
   if (!nome || !cognome) {
     if (!nome && nomeInput) nomeInput.classList.add("input-error");
     if (!cognome && cognomeInput) cognomeInput.classList.add("input-error");
@@ -965,10 +960,9 @@ function esportaExcel() {
   ];
 
   const last = new Date(anno, mese + 1, 0);
-  const numGiorni = last.getDate();
   let totaleDecimali = 0;
 
-  for (let g = 1; g <= numGiorni; g++) {
+  for (let g = 1; g <= last.getDate(); g++) {
     const d = datiOrario[anno]?.[mese]?.[g] || {};
     const tot = d.totaleMinuti || 0;
     const dec = parseFloat(formatMinutesToDecimal(tot));
@@ -976,52 +970,34 @@ function esportaExcel() {
 
     rows.push([
       `${String(g).padStart(2,"0")}/${String(mese+1).padStart(2,"0")}/${anno}`,
-      d.ingressoLavoro || "",
-      d.uscitaLavoro || "",
-      d.uscitaPermesso || "",
-      d.ingressoPermesso || "",
-      d.uscitaMissione || "",
-      d.ingressoMissione || "",
-      d.note || "",
-      tot > 0 ? formatMinutesToHM(tot) : "",
-      tot > 0 ? dec.toFixed(2) : ""
+      d.ingressoLavoro || "", d.uscitaLavoro || "",
+      d.uscitaPermesso || "", d.ingressoPermesso || "",
+      d.uscitaMissione || "", d.ingressoMissione || "",
+      d.note || "", tot > 0 ? formatMinutesToHM(tot) : "", tot > 0 ? dec.toFixed(2) : ""
     ]);
   }
 
   rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
 
-  // Generiamo l'Excel usando solo comandi standard nativi della libreria
-  try {
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(wb, ws, "Orario");
-    
-    // Scarichiamo il file immediatamente
-    XLSX.writeFile(wb, nomeFile);
-    
-    // Mostriamo il banner di successo
-    mostraBanner();
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+  XLSX.utils.book_append_sheet(wb, ws, "Orario");
+  XLSX.writeFile(wb, nomeFile);
 
-// PULIZIA TOTALE (Svuota il calendario e azzera la pagina)
+  mostraBanner();
+
+  // CANCELLAZIONE ORE E RESET PAGINA
   if (datiOrario[anno] && datiOrario[anno][mese]) {
     delete datiOrario[anno][mese];
     salvaDati();
   }
 
-  // 2. Forza lo svuotamento delle caselle Nome e Cognome usando direttamente gli ID
-  const campoNome = document.getElementById("nome");
-  const campoCognome = document.getElementById("cognome");
-  
-  if (campoNome) campoNome.value = "";
-  if (campoCognome) campoCognome.value = "";
+  // SVUOTAMENTO CAMPI DI TESTO
+  if (nomeInput) nomeInput.value = "";
+  if (cognomeInput) cognomeInput.value = "";
 
-  // Ridisegna il calendario vuoto e azzera i contatori del riepilogo
+  // AGGIORNAMENTO GRAFICA CALENDARIO
   generaCalendario();
-}
-
-  } catch (errore) {
-    alert("Errore durante la generazione del file Excel: " + errore.message);
-  }
 }
 
 function mostraBanner() {
