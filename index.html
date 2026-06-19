@@ -602,9 +602,12 @@ function getFestivi(anno) {
 }
 
 function pulisciErroriInput() {
-  document.getElementById("nome").classList.remove("input-error");
-  document.getElementById("cognome").classList.remove("input-error");
-  document.getElementById("exportTooltip").style.display = "none";
+  const n = document.getElementById("nome");
+  const c = document.getElementById("cognome");
+  const t = document.getElementById("exportTooltip");
+  if (n) n.classList.remove("input-error");
+  if (c) c.classList.remove("input-error");
+  if (t) t.style.display = "none";
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -915,17 +918,26 @@ function aggiornaRiepilogoMensile() {
    ESPORTA EXCEL E BANNER CONFERMA - COMPATIBILITÀ UNIVERSALE
 ============================================================ */
 function esportaExcel() {
-  const nome = document.getElementById("nome").value.trim();
-  const cognome = document.getElementById("cognome").value.trim();
+  // Raccogliamo i dati pulendoli dagli spazi
+  const nomeInput = document.getElementById("nome");
+  const cognomeInput = document.getElementById("cognome");
+  const nome = nomeInput ? nomeInput.value.trim() : "";
+  const cognome = cognomeInput ? cognomeInput.value.trim() : "";
   const tooltip = document.getElementById("exportTooltip");
 
-  pulisciErroriInput();
+  // Rimuoviamo gli errori precedenti in modo sicuro
+  if (nomeInput) nomeInput.classList.remove("input-error");
+  if (cognomeInput) cognomeInput.classList.remove("input-error");
+  if (tooltip) tooltip.style.display = "none";
 
+  // Controllo dei campi obbligatori
   if (!nome || !cognome) {
-    if (!nome) document.getElementById("nome").classList.add("input-error");
-    if (!cognome) document.getElementById("cognome").classList.add("input-error");
-    tooltip.style.display = "block";
-    setTimeout(() => { tooltip.style.display = "none"; }, 2500);
+    if (!nome && nomeInput) nomeInput.classList.add("input-error");
+    if (!cognome && cognomeInput) cognomeInput.classList.add("input-error");
+    if (tooltip) {
+      tooltip.style.display = "block";
+      setTimeout(() => { tooltip.style.display = "none"; }, 2500);
+    }
     return;
   }
 
@@ -964,28 +976,35 @@ function esportaExcel() {
 
   rows.push(["TOTALE","","","","","","","","", totaleDecimali.toFixed(2)]);
 
-  // Generazione del foglio senza manipolazioni strane delle celle
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  XLSX.utils.book_append_sheet(wb, ws, "Orario");
+  // Generiamo l'Excel usando solo comandi standard nativi della libreria
+  try {
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(wb, ws, "Orario");
+    
+    // Scarichiamo il file immediatamente
+    XLSX.writeFile(wb, nomeFile);
+    
+    // Mostriamo il banner di successo
+    mostraBanner();
 
-  // Forza il download immediato (riconosciuto da PC e Android come azione utente sicura)
-  XLSX.writeFile(wb, nomeFile);
-
-  mostraBanner();
-
-  // Pulizia della memoria locale e reset visivo sul portale
-  if (datiOrario[anno] && datiOrario[anno][mese]) {
-    delete datiOrario[anno][mese];
-    salvaDati();
-    generaCalendario();
+    // Svuotiamo il mese e aggiorniamo la schermata
+    if (datiOrario[anno] && datiOrario[anno][mese]) {
+      delete datiOrario[anno][mese];
+      salvaDati();
+      generaCalendario();
+    }
+  } catch (errore) {
+    alert("Errore durante la generazione del file Excel: " + errore.message);
   }
 }
 
 function mostraBanner() {
   const banner = document.getElementById("exportBanner");
-  banner.classList.add("visible");
-  setTimeout(() => { banner.classList.remove("visible"); }, 2500);
+  if (banner) {
+    banner.classList.add("visible");
+    setTimeout(() => { banner.classList.remove("visible"); }, 2500);
+  }
 }
 
 function isPWA() {
